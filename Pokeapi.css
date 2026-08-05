@@ -1,0 +1,11 @@
+.slider {
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    min-height: 180px;
+}
+
+.track {
+    display: flex;
+    align-items: flex-start;
+}

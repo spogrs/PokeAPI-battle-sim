@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeAPI</title>
+    <link rel="stylesheet" href="Pokeapi.css">
+    <script src="Pokeapi.js" defer></script>
+
+</head>
+
+
+<body>
+
+    <main>
+        <div class="slider">
+            <div class="track"></div>
+        </div>
+        <aside id="details">Select a Pokémon</aside>
+    </main>
+
+
+    <!-- DEBUG BUTTONS TEMPORARY -->
+    <button onclick="fetchKantoPokemon()">Fetch Kanto Pokemon</button>
+    <!-- <button onclick="filterByType('fire')">Filter by Fire Type</button> TO BE REUSED DEBUGGING BUTTON-->
+
+
+    <div id="Type sorting">
+        <label for="type-select">Filter by Type:</label>
+        <select id="type-select" onchange="filterByType(this.value)">
+            <option value="">None</option>
+            <option value="bug">Bug</option>
+            <option value="dark">Dark</option>
+            <option value="dragon">Dragon</option>
+            <option value="electric">Electric</option>
+            <option value="fairy">Fairy</option>
+            <option value="fighting">Fighting</option>
+            <option value="fire">Fire</option>
+            <option value="flying">Flying</option>
+            <option value="ghost">Ghost</option>
+            <option value="grass">Grass</option>
+            <option value="ground">Ground</option>
+            <option value="ice">Ice</option>
+            <option value="normal">Normal</option>
+            <option value="poison">Poison</option>
+            <option value="psychic">Psychic</option>
+            <option value="rock">Rock</option>
+            <option value="steel">Steel</option>
+            <option value="water">Water</option>
+        </select>
+    </div>
+
+    <!--
+    Type list for laziness
+    Bug
+    Dark
+    Dragon
+    Electric
+    Fairy
+    Fighting
+    Fire
+    Flying
+    Ghost
+    Grass
+    Ground
+    Ice
+    Normal
+    Poison
+    Psychic
+    Rock
+    Steel
+    Water
+    -->
+
+    <div id="pokemon-select" style="margin-top: 20px;"></div>
+
+</body>
+
+
+
+</html>

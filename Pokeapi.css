@@ -1,11 +1,132 @@
-.slider {
-    overflow-x: auto;
-    white-space: nowrap;
-    width: 100%;
-    min-height: 180px;
+
+/* MAKE CONTAINER A POPOUT MAYBE?*/
+#Pokemon-Container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    z-index: 1000;
+    background: grey;
+    width: 1180px;
+    min-width: 144px;
+    max-width: 100%;
 }
 
-.track {
+.pokegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 144px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-items: start;
+    gap: 4px;
+    max-height: 100%;
+    scrollbar-color: #888 #ddd;
+}
+
+
+
+
+
+
+.card {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    cursor: pointer;
+    background-color: lightgray;
+    border-style: inset;
+    border-color: black;
+    border-radius: 10px;
+}
+
+.type-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    align-self: left;
+    padding-right: 5px;
+}
+
+.type {
+    background-color: red;
+    color: white;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 15px;
+    display: inline-block;
+    padding-bottom: 3px;
+    min-width: 48%;
+    font-weight: bold;
+}
+
+.type-normal {
+    background-color: #A8A77A;
+}
+
+.type-fire {
+    background-color: #ee8130;
+}
+
+.type-water {
+    background-color: #6390F0;
+}
+
+.type-electric {
+    background-color: #F7D02C;
+}
+
+.type-grass {
+    background-color: #7AC74C;
+}
+
+.type-ice {
+    background-color: #96D9D6;
+}
+
+.type-fighting {
+    background-color: #C22E28;
+}
+
+.type-poison {
+    background-color: #A33EA1;
+}
+
+.type-ground {
+    background-color: #E2BF65;
+}
+
+.type-flying {
+    background-color: #A98FF3;
+}
+
+.type-psychic {
+    background-color: #F95587;
+}
+
+.type-bug {
+    background-color: #A6B91A;
+}
+
+.type-rock {
+    background-color: #B6A136;
+}
+
+.type-ghost {
+    background-color: #735797;
+}
+
+.type-dragon {
+    background-color: #6F35FC;
+}
+
+.type-dark {
+    background-color: #705746;
+}
+
+.type-steel {
+    background-color: #B7B7CE;
+}
+
+.type-fairy {
+    background-color: #D685AD;
 }

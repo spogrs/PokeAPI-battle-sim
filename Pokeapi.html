@@ -11,24 +11,35 @@
 </head>
 
 
-<body>
+<body onload="fetchPokemon()">
 
     <main>
-        <div class="slider">
-            <div class="track"></div>
+        <div id="Pokemon-Container">
+            <div class="pokegrid"></div>
         </div>
-        <aside id="details">Select a Pokémon</aside>
     </main>
 
 
-    <!-- DEBUG BUTTONS TEMPORARY -->
-    <button onclick="fetchKantoPokemon()">Fetch Kanto Pokemon</button>
-    <!-- <button onclick="filterByType('fire')">Filter by Fire Type</button> TO BE REUSED DEBUGGING BUTTON-->
+    <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
+    <button onclick="">pick popout temp</button>
+    <div id="Sort by region">
+        <label for="Region-select">Filter by region:</label>
+        <select id="Region-select" onchange="renderPokemons(document.getElementById('type-select').value, this.value)">
+            <option value="">None</option>
+            <option value="kanto">Kanto</option>
+            <option value="johto">Johto</option>
+            <option value="hoenn">Hoenn</option>
+            <option value="sinnoh">Sinnoh</option>
+            <option value="unova">Unova</option>
+            <option value="kalos">Kalos</option>
+            <option value="alola">Alola</option>
+            <option value="galar">Galar</option>
+        </select>
+    </div>
 
-
-    <div id="Type sorting">
+    <div id="Sort by type">
         <label for="type-select">Filter by Type:</label>
-        <select id="type-select" onchange="filterByType(this.value)">
+        <select id="type-select" onchange="renderPokemons(this.value, document.getElementById('Region-select').value)">
             <option value="">None</option>
             <option value="bug">Bug</option>
             <option value="dark">Dark</option>
@@ -51,29 +62,7 @@
         </select>
     </div>
 
-    <!--
-    Type list for laziness
-    Bug
-    Dark
-    Dragon
-    Electric
-    Fairy
-    Fighting
-    Fire
-    Flying
-    Ghost
-    Grass
-    Ground
-    Ice
-    Normal
-    Poison
-    Psychic
-    Rock
-    Steel
-    Water
-    -->
 
-    <div id="pokemon-select" style="margin-top: 20px;"></div>
 
 </body>
 

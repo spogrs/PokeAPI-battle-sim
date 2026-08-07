@@ -1,33 +1,114 @@
-
-/* MAKE CONTAINER A POPOUT MAYBE?*/
-#Pokemon-Container {
+#Panel {
+    height: 100%;
+    width: 21%;
+    min-width: 21%;
     position: fixed;
     top: 0;
-    right: 0;
+    left: 0;
+    overflow-x: hidden;
+    z-index: 2;
+    background-image: linear-gradient(to left, rgb(160, 160, 160), rgb(133, 133, 133), rgb(92, 92, 92));
+}
+
+#sidefooter {
+    position: fixed;
+    bottom: 0px;
+    height: 5%;
+    background-color: black;
+    width: inherit;
+    align-content: center;
+}
+
+#teams {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.team {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid black;
+    box-sizing: border-box;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.team.active {
+    border-color: #00ff00;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.team-status {
+    font-weight: bold;
+    color: white;
+}
+
+.team-message {
+    min-height: 24px;
+    color: #ffeb3b;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.team-message.visible {
+    opacity: 1;
+}
+
+.selected {
+    display: grid;
+}
+
+.selected .mini {
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid white;
+    border-radius: 8px;
+}
+
+.selected .mini button {
+    cursor: pointer;
+}
+
+
+
+
+
+/* Maybe use for the battle aswell */
+#Pokemon-Container {
+    padding-right: 1px;
+    position: fixed;
+    top: 0;
+    right: -1518px;
     bottom: 0;
     left: auto;
-    z-index: 1000;
+    z-index: 1;
     background: grey;
-    width: 1180px;
-    min-width: 144px;
-    max-width: 100%;
+    min-width: 148px;
+    max-width: 79%;
+    transition: right 0.2s ease-in-out;
+    height: 100%;
+}
+
+#Pokemon-Container.open {
+    right: 0;
 }
 
 .pokegrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 144px);
+    
+    grid-template-columns: repeat(10, 148px);
     overflow-x: hidden;
     overflow-y: auto;
     align-items: start;
     gap: 4px;
-    max-height: 100%;
-    scrollbar-color: #888 #ddd;
+    height: 100%;
+    scroll-snap-type: mandatory;
 }
-
-
-
-
-
 
 .card {
     display: flex;
@@ -37,6 +118,7 @@
     border-style: inset;
     border-color: black;
     border-radius: 10px;
+    scroll-snap-align: center;
 }
 
 .type-row {
@@ -58,6 +140,27 @@
     min-width: 48%;
     font-weight: bold;
 }
+
+
+
+
+/* Select  highlight */
+.card.selected {
+    outline-offset: -4px;
+    outline: 5px solid green;
+    background-color: #ffffff;
+}
+
+/*  list in side panel */
+#selected {
+    padding: 8px;
+    color: white;
+}
+
+#selected .mini button {
+    cursor: pointer;
+}
+
 
 .type-normal {
     background-color: #A8A77A;

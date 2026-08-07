@@ -3,6 +3,11 @@ const cache = {};
 const pokegrid = document.querySelector('.pokegrid');
 const details = document.getElementById('details');
 
+const maxTeamSize = 6;
+const teams = [new Set(), new Set()];
+let currentTeam = 0;
+let teamMessageTimeout = null;
+
 async function fetchPokemon(limit = 905) {
     const fetchPromises = [];
     for (let id = 1; id <= limit; id++) {
@@ -19,6 +24,7 @@ function fetchPokemonData(id) {
             cache[id] = {
                 id: id,
                 name: pokemonData.species.name || pokemonData.name, // prevents sub species from being displayed as the name as they are often too long
+                // redo sprite data maybe for battle but idk
                 sprite: pokemonData.sprites.front_default,
                 types:
                 {
@@ -59,9 +65,11 @@ function renderPokemons(Type = '', Region = '') {
                 .some(typeName => typeName.toLowerCase() === Type.toLowerCase());
         })
         .sort((a, b) => a.id - b.id);
-    // use theonclick to select later choose is a temp not real func
+
+    // render grid; include data-id and selected class when applicable
+    const currentTeamSet = teams[currentTeam];
     pokegrid.innerHTML = visiblePokemon.map(pokemon => `
-            <div class="card" onclick="Choose(${pokemon.id})" style="order: ${pokemon.id}; padding: 5px;">
+            <div class="card ${currentTeamSet.has(pokemon.id) ? 'selected' : ''}" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
                <h3 style="margin: 0;">${pokemon.name}</h3>
                 <small style="margin: 0;">#${pokemon.id}</small>
                 <img src="${pokemon.sprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
@@ -71,7 +79,68 @@ function renderPokemons(Type = '', Region = '') {
                 </div>
             </div>
         `).join('');
+
+    renderSelected();
+    updateTeamUI();
 }
+
+// generic container toggle i hope
+function toggleContainer(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.classList.toggle('open');
+    }
+}
+function switchTeam(index) {
+    currentTeam = index;
+    const type = document.getElementById('type-select') ? document.getElementById('type-select').value : '';
+    const region = document.getElementById('Region-select') ? document.getElementById('Region-select').value : '';
+    renderPokemons(type, region);
+}
+
+function Choose(id) {
+    const currentTeamSet = teams[currentTeam];
+    if (currentTeamSet.has(id)) {
+        currentTeamSet.delete(id);
+    } else {
+        if (currentTeamSet.size >= maxTeamSize) {
+            showTeamMessage(currentTeam, `Team ${currentTeam + 1} is full (max ${maxTeamSize})`);
+            return;
+        }
+        currentTeamSet.add(id);
+    }
+
+    const type = document.getElementById('type-select') ? document.getElementById('type-select').value : '';
+    const region = document.getElementById('Region-select') ? document.getElementById('Region-select').value : '';
+    renderPokemons(type, region);
+}
+
+function renderSelected() {
+    const selectedDiv = document.getElementById(`selected-${currentTeam}`);
+    if (!selectedDiv) return;
+    const currentTeamSet = teams[currentTeam];
+    const items = Array.from(currentTeamSet).map(id => {
+        const p = cache[id];
+        return `
+            <div class="mini" data-id="${id}" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;color:white;">
+                <img src="${p.sprite}" alt="${p.name}" style="width:32px;height:32px;">
+                <span>${p.name} #${p.id}</span>
+                <button style="margin-left:8px;" onclick="event.stopPropagation(); Choose(${p.id})">Remove</button>
+            </div>
+        `;
+    }).join('');
+    selectedDiv.innerHTML = items;
+}
+
+function updateTeamUI() {
+    teams.forEach((team, i) => {
+        document.getElementById(`team-${i}`)?.classList.toggle('active', i === currentTeam);
+        const status = document.getElementById(`team-status-${i}`);
+        if (status) status.textContent = `Team ${i + 1}: ${team.size}/${maxTeamSize}`;
+    });
+}
+
+
 
 
 

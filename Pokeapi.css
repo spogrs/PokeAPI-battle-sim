@@ -1,7 +1,7 @@
 #Panel {
     height: 100%;
-    width: 21%;
-    min-width: 21%;
+    width: 403px;
+    min-width: 403px;
     position: fixed;
     top: 0;
     left: 0;
@@ -14,7 +14,7 @@
     position: fixed;
     bottom: 0px;
     height: 5%;
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0.500);
     width: inherit;
     align-content: center;
 }
@@ -23,14 +23,15 @@
     display: flex;
     gap: 20px;
     padding: 20px;
+    flex-direction: row;
 }
 
 .team {
     flex: 1;
-    padding: 12px;
+    padding: 4px;
     border: 2px solid black;
     box-sizing: border-box;
-    min-height: 360px;
+    height: 350px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -39,6 +40,7 @@
 }
 
 .team.active {
+    cursor: default;
     border-color: #00ff00;
     background: rgba(255, 255, 255, 0.15);
 }
@@ -48,16 +50,6 @@
     color: white;
 }
 
-.team-message {
-    min-height: 24px;
-    color: #ffeb3b;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.team-message.visible {
-    opacity: 1;
-}
 
 .selected {
     display: grid;
@@ -68,11 +60,56 @@
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid white;
     border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    color: white;
 }
 
-.selected .mini button {
+/*Maybe use this part to add instead of box select?*/
+#pokemoninfo {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-direction: row;
+    /*temp border for visualization*/
+    border: solid #00ff00;
+    border-radius: 8px;
+}
+
+.profile-container {
+    /*temp border for visualization*/
+    border: solid yellow;
+    border-radius: 8px;
+}
+
+.data-container {
+    display: flex;
+    line-height: 20px;
+
+    /*temp border for visualization*/
+    border: solid red;
+    border-radius: 8px;
+}
+
+#selectedname {
+    text-transform: capitalize;
+}
+
+#selectedstats {
+    text-transform: capitalize;
     cursor: pointer;
 }
+
+#selectedmoves {
+    text-transform: capitalize;
+    cursor: pointer;
+}
+
+
+
 
 
 
@@ -83,15 +120,16 @@
     padding-right: 1px;
     position: fixed;
     top: 0;
-    right: -1518px;
+    right: -100vw;
     bottom: 0;
-    left: auto;
     z-index: 1;
     background: grey;
+    width: calc(100vw - 403px);
+    max-width: calc(100vw - 403px);
     min-width: 148px;
-    max-width: 79%;
     transition: right 0.2s ease-in-out;
     height: 100%;
+    box-sizing: border-box;
 }
 
 #Pokemon-Container.open {
@@ -100,14 +138,16 @@
 
 .pokegrid {
     display: grid;
-    
-    grid-template-columns: repeat(10, 148px);
+    grid-template-columns: repeat(auto-fill, 148px);
     overflow-x: hidden;
     overflow-y: auto;
-    align-items: start;
-    gap: 4px;
+    align-content: flex-start;
+    justify-content: center;
+    gap: 3px;
+    padding: 3px;
     height: 100%;
     scroll-snap-type: mandatory;
+    justify-content: start;
 }
 
 .card {
@@ -119,6 +159,7 @@
     border-color: black;
     border-radius: 10px;
     scroll-snap-align: center;
+    text-transform: capitalize;
 }
 
 .type-row {
@@ -127,10 +168,10 @@
     gap: 4px;
     align-self: left;
     padding-right: 5px;
+    padding-left: 3px;
 }
 
 .type {
-    background-color: red;
     color: white;
     text-align: center;
     border: 1px solid black;
@@ -155,13 +196,12 @@
 #selected {
     padding: 8px;
     color: white;
-}
-
-#selected .mini button {
-    cursor: pointer;
+    text-transform: capitalize;
 }
 
 
+
+/* the type colour nightmare stack */
 .type-normal {
     background-color: #A8A77A;
 }

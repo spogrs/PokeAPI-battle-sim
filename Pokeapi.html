@@ -60,27 +60,41 @@
                     <option value="water">Water</option>
                 </select>
             </div>
+
+        </section>
+
+        <section id="pokemoninfo">
+            <div class="profile-container">
+                <h2 id="selectedname"></h2>
+                <img src="" id="selectedsprite" class="hidden">
+            </div>
+
+            <div class="data-container">
+                <div id="selectedstats" class="info-panel"></div>
+                <div id="selectedmoves" class="info-panel"></div>
+            </div>
         </section>
 
 
-
-        <div id="teams">
-            <div class="team">
+        <section id="teams">
+            <div class="team team-1" onclick="switchTeam(1)">
                 <div class="team-status">Team 1: 0/6</div>
-                <div class="team-message"></div>
                 <div class="selected"></div>
             </div>
 
-            <div class="team">
+            <div class="team team-2" onclick="switchTeam(2)">
                 <div class="team-status">Team 2: 0/6</div>
-                <div class="team-message"></div>
                 <div class="selected"></div>
             </div>
-        </div>
+        </section>
 
         <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
-        <button onclick="toggleContainer('Pokemon-Container');" style="position: fixed;">pick popout
+        <button onclick="toggleContainer('Pokemon-Container', 'open');" style="position: fixed;">pick popout
             temp</button>
+        <br>
+        <br>
+        <button onclick="Pokemoninfo(1);">Debug load pokemon</button>
+
 
         <footer id="sidefooter">
             <a href="https://github.com/spogrs/PokeAPI-battle-sim">
@@ -92,7 +106,6 @@
                 </svg>
                 <span style="font-weight: bold; color: white;">GitHub</span>
             </a>
-
         </footer>
 
 

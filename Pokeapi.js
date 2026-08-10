@@ -6,8 +6,8 @@ const details = document.getElementById('details');
 const maxTeamSize = 6;
 const teams = [new Set(), new Set()];
 let currentTeam = 0;
-let teamMessageTimeout = null;
 
+// if theres a way to find types easier it would save alot of api calls
 async function fetchPokemon(limit = 905) {
     const fetchPromises = [];
     for (let id = 1; id <= limit; id++) {
@@ -30,20 +30,13 @@ function fetchPokemonData(id) {
                 {
                     type1: pokemonData.types[0].type.name,
                     type2: pokemonData.types[1] ? pokemonData.types[1].type.name : null,
-                },
-                stats: {
-                    hp: pokemonData.stats[0].base_stat,
-                    attack: pokemonData.stats[1].base_stat,
-                    defense: pokemonData.stats[2].base_stat,
-                    specialAttack: pokemonData.stats[3].base_stat,
-                    specialDefense: pokemonData.stats[4].base_stat,
-                    speed: pokemonData.stats[5].base_stat
                 }
             };
         });
 }
 // combine with the filter later probably maybe make a helper function to add to the track but well see
 function renderPokemons(Type = '', Region = '') {
+    // could use region api for this considering it
     const RegionRanges = {
         none: [1, 905],
         kanto: [1, 151],
@@ -85,17 +78,24 @@ function renderPokemons(Type = '', Region = '') {
 }
 
 // generic container toggle i hope
-function toggleContainer(containerId) {
+function toggleContainer(containerId, Toggle) {
     const container = document.getElementById(containerId);
     if (container) {
-        container.classList.toggle('open');
+        container.classList.toggle(Toggle);
     }
 }
 function switchTeam(index) {
-    currentTeam = index;
-    const type = document.getElementById('type-select') ? document.getElementById('type-select').value : '';
-    const region = document.getElementById('Region-select') ? document.getElementById('Region-select').value : '';
-    renderPokemons(type, region);
+    currentTeam = index - 1
+    const team1 = document.querySelector('.team-1');
+    const team2 = document.querySelector('.team-2');
+    if (index === 1) {
+        team1.classList.add('active');
+        team2.classList.remove('active');
+    } else {
+        team1.classList.remove('active');
+        team2.classList.add('active');
+    }
+    renderSelected();
 }
 
 function Choose(id) {
@@ -103,60 +103,86 @@ function Choose(id) {
     if (currentTeamSet.has(id)) {
         currentTeamSet.delete(id);
     } else {
-        if (currentTeamSet.size >= maxTeamSize) {
-            showTeamMessage(currentTeam, `Team ${currentTeam + 1} is full (max ${maxTeamSize})`);
-            return;
-        }
-        currentTeamSet.add(id);
+        if (currentTeamSet.size < maxTeamSize)
+            currentTeamSet.add(id);
     }
-
     const type = document.getElementById('type-select') ? document.getElementById('type-select').value : '';
     const region = document.getElementById('Region-select') ? document.getElementById('Region-select').value : '';
     renderPokemons(type, region);
+    renderSelected();
+    updateTeamUI();
 }
 
 function renderSelected() {
-    const selectedDiv = document.getElementById(`selected-${currentTeam}`);
+    const selectedDiv = document.querySelector(`.team-${currentTeam + 1} .selected`);
     if (!selectedDiv) return;
     const currentTeamSet = teams[currentTeam];
     const items = Array.from(currentTeamSet).map(id => {
         const p = cache[id];
         return `
-            <div class="mini" data-id="${id}" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;color:white;">
+            <div class="mini" data-id="${id}"onclick="Pokemoninfo(${id})";>
                 <img src="${p.sprite}" alt="${p.name}" style="width:32px;height:32px;">
-                <span>${p.name} #${p.id}</span>
-                <button style="margin-left:8px;" onclick="event.stopPropagation(); Choose(${p.id})">Remove</button>
+                <span>${p.name}</span>
             </div>
         `;
     }).join('');
     selectedDiv.innerHTML = items;
 }
-
+// onclick="Choose(${pokemon.id})
 function updateTeamUI() {
     teams.forEach((team, i) => {
-        document.getElementById(`team-${i}`)?.classList.toggle('active', i === currentTeam);
-        const status = document.getElementById(`team-status-${i}`);
-        if (status) status.textContent = `Team ${i + 1}: ${team.size}/${maxTeamSize}`;
+        const status = document.querySelector(`.team-${i + 1} .team-status`);
+        if (status) {
+            status.textContent = `Team ${i + 1}: ${team.size}/${maxTeamSize}`;
+        }
     });
 }
 
+// :/ idk rushed
+async function Pokemoninfo(id) {
+    await fetchPokemondetails(id);
+    document.getElementById('selectedname').textContent = cache[id].name;
+    document.getElementById('selectedsprite').src = cache[id].sprite;
 
+    // make changeable via method prolly we'll see
+    // porbably also use a loop but unsure 
+    document.getElementById('selectedmoves').textContent = cache[id].moves[1].name;
 
+    // check if i this loops even good
+    const statsContainer = document.getElementById('selectedstats');
+    statsContainer.textContent = '';
+    for (const [key, value] of Object.entries(cache[id].stats)) {
+        const statLine = document.createElement('div');
+        statLine.textContent = `${key}: ${value}`;
+        statsContainer.appendChild(statLine);
+    }
+    // add type stuff
 
-
-
-
-
-
-
-/*function fetchPokemonData(pokemon) {
-    // uses the url in each pokemons data to fetch their data and save it in pokemondata var
-    fetch(pokemon.url)
-        .then(response => response.json())
-        .then(pokemonData => {
-            console.log(pokemonData);
-        });
 }
-*/
 
+
+// helper function for moves ev/iv and abilities
+async function fetchPokemondetails(id) {
+    if (cache[id].stats) return cache[id];
+
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+    const data = await response.json();
+
+    cache[id].stats = {
+        hp: data.stats[0].base_stat,
+        attack: data.stats[1].base_stat,
+        defense: data.stats[2].base_stat,
+        specialAttack: data.stats[3].base_stat,
+        specialDefense: data.stats[4].base_stat,
+        speed: data.stats[5].base_stat
+    };
+    cache[id].moves = data.moves.map(m => {
+        const urlParts = m.move.url.split('/');
+        const moveNumber = urlParts[urlParts.length - 2];
+        return {
+            name: m.move.name,
+            nr: moveNumber
+        };
+    });
+}
 

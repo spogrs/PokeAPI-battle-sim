@@ -70,44 +70,84 @@
 
 /*Maybe use this part to add instead of box select?*/
 #pokemoninfo {
-    display: flex;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    margin: 0px;
     padding: 20px;
     flex-direction: row;
+
     /*temp border for visualization*/
-    border: solid #00ff00;
-    border-radius: 8px;
 }
 
 .profile-container {
+    margin: 0px;
+    grid-area: 1 / 1 / 2 / 2;
     /*temp border for visualization*/
-    border: solid yellow;
-    border-radius: 8px;
-}
-
-.data-container {
-    display: flex;
-    line-height: 20px;
-
-    /*temp border for visualization*/
-    border: solid red;
-    border-radius: 8px;
+    border: 2px solid black;
 }
 
 #selectedname {
+    height: 15%;
+    text-align: center;
     text-transform: capitalize;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+#selectedsprite {
+    width: 100%;
+    height: 85%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    box-sizing: border-box;
+}
+
+.data-container {
+    grid-area: 1 / 2 / 2 / 2;
+    /*temp border for visualization*/
+    border: 2px solid black;
+}
+
+#selectedTypeRow {
+    height: 15%;
+    box-sizing: border-box;
 }
 
 #selectedstats {
+    height: 85%;
     text-transform: capitalize;
     cursor: pointer;
+
+    text-align-last: justify;
+    box-sizing: border-box;
 }
 
-#selectedmoves {
+
+#Move-container {
+    grid-area: 2 / 1 / 3 / 3;
+    grid-template-rows: 2;
     text-transform: capitalize;
     cursor: pointer;
+    border: 2px solid black;
+    box-sizing: border-box;
 }
 
+.move {
+    color: white;
+    text-align: center;
+    border: 1px solid black;
+    background-color: rebeccapurple;
+    border-radius: 15px;
+    display: inline-block;
+    padding-bottom: 3px;
+    min-width: 49%;
+    font-weight: bold;
+    box-sizing: border-box;
+
+}
 
 
 
@@ -168,7 +208,7 @@
     gap: 4px;
     align-self: left;
     padding-right: 5px;
-    padding-left: 3px;
+    padding-left: 5px;
 }
 
 .type {
@@ -176,10 +216,15 @@
     text-align: center;
     border: 1px solid black;
     border-radius: 15px;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding-bottom: 3px;
     min-width: 48%;
     font-weight: bold;
+    text-transform: capitalize;
+    box-sizing: border-box;
+
 }
 
 

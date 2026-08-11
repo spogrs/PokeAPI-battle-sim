@@ -144,16 +144,31 @@ async function Pokemoninfo(id) {
     document.getElementById('selectedname').textContent = cache[id].name;
     document.getElementById('selectedsprite').src = cache[id].sprite;
 
+
     // make changeable via method prolly we'll see
     // porbably also use a loop but unsure 
-    document.getElementById('selectedmoves').textContent = cache[id].moves[1].name;
+    // placeholder loader atm
+    document.getElementById('Move1').textContent = cache[id].moves[1].name;
+    document.getElementById('Move2').textContent = cache[id].moves[2].name;
+    document.getElementById('Move3').textContent = cache[id].moves[3].name;
+    document.getElementById('Move4').textContent = cache[id].moves[4].name;
+
+    selectedTypeRow.innerHTML = `
+  <span class="type type-${cache[id].types.type1}">${cache[id].types.type1}</span>
+  ${cache[id].types.type2 ? `<span class="type type-${cache[id].types.type2}">${cache[id].types.type2}</span>` : ""}
+`;
+
+
+    //document.getElementById('Type1').textContent = cache[id].types.type1;
+    //document.getElementById('Type2').textContent = cache[id].types.type2;
+
 
     // check if i this loops even good
     const statsContainer = document.getElementById('selectedstats');
     statsContainer.textContent = '';
     for (const [key, value] of Object.entries(cache[id].stats)) {
         const statLine = document.createElement('div');
-        statLine.textContent = `${key}: ${value}`;
+        statLine.textContent = `${key} ${value}`;
         statsContainer.appendChild(statLine);
     }
     // add type stuff
@@ -169,12 +184,12 @@ async function fetchPokemondetails(id) {
     const data = await response.json();
 
     cache[id].stats = {
-        hp: data.stats[0].base_stat,
-        attack: data.stats[1].base_stat,
-        defense: data.stats[2].base_stat,
-        specialAttack: data.stats[3].base_stat,
-        specialDefense: data.stats[4].base_stat,
-        speed: data.stats[5].base_stat
+        HP: data.stats[0].base_stat,
+        ATK: data.stats[1].base_stat,
+        DEF: data.stats[2].base_stat,
+        SpATK: data.stats[3].base_stat,
+        SpDEF: data.stats[4].base_stat,
+        SPD: data.stats[5].base_stat
     };
     cache[id].moves = data.moves.map(m => {
         const urlParts = m.move.url.split('/');

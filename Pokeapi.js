@@ -173,19 +173,14 @@ async function Pokemoninfo(id) {
 `;
 
     // check if this loops even good
-    const statsContainer = document.getElementById('selectedstats');
-    statsContainer.textContent = '';
     for (const [key, value] of Object.entries(PkmnCache[id].stats)) {
-        const statLine = document.createElement('div');
-        statLine.textContent = `${key} ${value}`;
-        statsContainer.appendChild(statLine);
+        document.getElementById(key + 'stat').textContent = `${value}`;
     }
     // add type stuff
 
 }
 
 
-// helper function for moves ev/iv and abilities
 async function fetchPokemondetails(id) {
     if (PkmnCache[id].stats) return PkmnCache[id];
 
@@ -207,7 +202,9 @@ async function fetchPokemondetails(id) {
             nr: moveNumber,
         };
     });
-
+    // THIS IS REALYL BAD I NEED TO FIX IT 
+    // fix it by changin to only load 4 selected mvoes and then run a fetch on move change?
+    // would have to fetch type again though :?
     await Promise.all(PkmnCache[id].moves.map(move => fetchMoveInfo(move.nr)));
 }
 

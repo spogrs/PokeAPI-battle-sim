@@ -113,19 +113,53 @@
 }
 
 #selectedTypeRow {
+    min-height: 24px;
     padding-top: 2px;
     box-sizing: border-box;
 }
 
+
 #selectedstats {
-    height: 85%;
+    height: 80%;
     text-transform: capitalize;
     cursor: pointer;
     text-align-last: justify;
-    justify-content: space-between;
     box-sizing: border-box;
 }
 
+#statline ol {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#statline li {
+    border: 1px solid black;
+    display: grid;
+    /* Første kolonne (teksten) fylder 70px. Anden kolonne (span) tilpasser sig indholdet */
+    grid-template-columns: 50px auto;
+    align-items: center;
+    padding-left: 2px;
+
+}
+
+#statline span {
+    margin-right: 5px;
+    padding: 0 10px;
+    border: 2px solid red;
+    border-radius: 15px;
+    background-color: #00ff00;
+    font-weight: bold;
+}
+
+#Nature {
+    text-transform: capitalize;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
 
 #Move-container {
     grid-area: 2 / 1 / 3 / 3;
@@ -149,6 +183,7 @@
     box-sizing: border-box;
     margin-block: 1px;
     margin: 2px;
+    min-height: 23px;
 }
 
 
@@ -244,6 +279,8 @@
     color: white;
     text-transform: capitalize;
 }
+
+
 
 
 

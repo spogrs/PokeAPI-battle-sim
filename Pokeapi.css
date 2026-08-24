@@ -77,9 +77,10 @@
     grid-row-gap: 0px;
     margin: 0px;
     padding: 20px;
+    height: 303px;
     flex-direction: row;
-
-    /*temp border for visualization*/
+    background-clip: content-box;
+    background-color: white;
 }
 
 .profile-container {
@@ -112,7 +113,7 @@
 }
 
 #selectedTypeRow {
-    height: 15%;
+    padding-top: 2px;
     box-sizing: border-box;
 }
 
@@ -120,8 +121,8 @@
     height: 85%;
     text-transform: capitalize;
     cursor: pointer;
-
     text-align-last: justify;
+    justify-content: space-between;
     box-sizing: border-box;
 }
 
@@ -143,10 +144,11 @@
     border-radius: 15px;
     display: inline-block;
     padding-bottom: 3px;
-    min-width: 49%;
+    min-width: 48%;
     font-weight: bold;
     box-sizing: border-box;
-
+    margin-block: 1px;
+    margin: 2px;
 }
 
 
@@ -170,6 +172,7 @@
     transition: right 0.2s ease-in-out;
     height: 100%;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 #Pokemon-Container.open {
@@ -182,12 +185,13 @@
     overflow-x: hidden;
     overflow-y: auto;
     align-content: flex-start;
-    justify-content: center;
     gap: 3px;
     padding: 3px;
     height: 100%;
-    scroll-snap-type: mandatory;
+    scroll-snap-type: y mandatory;
     justify-content: start;
+    will-change: scroll-position;
+    scroll-behavior: smooth;
 }
 
 .card {
@@ -198,7 +202,6 @@
     border-style: inset;
     border-color: black;
     border-radius: 10px;
-    scroll-snap-align: center;
     text-transform: capitalize;
 }
 
@@ -209,6 +212,7 @@
     align-self: left;
     padding-right: 5px;
     padding-left: 5px;
+    max-height: 24px;
 }
 
 .type {
@@ -224,10 +228,7 @@
     font-weight: bold;
     text-transform: capitalize;
     box-sizing: border-box;
-
 }
-
-
 
 
 /* Select  highlight */
@@ -247,6 +248,7 @@
 
 
 /* the type colour nightmare stack */
+/* the api has type graphics whoops too late tho*/
 .type-normal {
     background-color: #A8A77A;
 }

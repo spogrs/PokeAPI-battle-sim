@@ -1,4 +1,8 @@
-const cache = {};
+const PkmnCache = {};
+const MoveCache = {};
+
+// mayb rename but use for damage relations in the https://pokeapi.co/api/v2/type/1/ api
+const TypeCache = {};
 
 const pokegrid = document.querySelector('.pokegrid');
 const details = document.getElementById('details');
@@ -8,6 +12,7 @@ const teams = [new Set(), new Set()];
 let currentTeam = 0;
 
 // if theres a way to find types easier it would save alot of api calls
+// mayb load first 50-60 and then afterwards do the rest?
 async function fetchPokemon(limit = 905) {
     const fetchPromises = [];
     for (let id = 1; id <= limit; id++) {
@@ -17,11 +22,12 @@ async function fetchPokemon(limit = 905) {
     renderPokemons();
 }
 
+// fetch specific basic pokemon data should maybej ust include in the base fetch but we'll see
 function fetchPokemonData(id) {
     return fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
         .then(response => response.json())
         .then(pokemonData => {
-            cache[id] = {
+            PkmnCache[id] = {
                 id: id,
                 name: pokemonData.species.name || pokemonData.name, // prevents sub species from being displayed as the name as they are often too long
                 // redo sprite data maybe for battle but idk
@@ -49,7 +55,7 @@ function renderPokemons(Type = '', Region = '') {
         galar: [810, 905]
     };
     const selectedRegion = Region || 'none';
-    const visiblePokemon = Object.values(cache)
+    const visiblePokemon = Object.values(PkmnCache)
         .filter(pokemon => pokemon.id >= RegionRanges[selectedRegion][0] && pokemon.id <= RegionRanges[selectedRegion][1])
         .filter(pokemon => {
             if (!Type) return true;
@@ -59,7 +65,6 @@ function renderPokemons(Type = '', Region = '') {
         })
         .sort((a, b) => a.id - b.id);
 
-    // render grid; include data-id and selected class when applicable
     const currentTeamSet = teams[currentTeam];
     pokegrid.innerHTML = visiblePokemon.map(pokemon => `
             <div class="card ${currentTeamSet.has(pokemon.id) ? 'selected' : ''}" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
@@ -84,6 +89,8 @@ function toggleContainer(containerId, Toggle) {
         container.classList.toggle(Toggle);
     }
 }
+
+// basic team selection swapper using current team index 
 function switchTeam(index) {
     currentTeam = index - 1
     const team1 = document.querySelector('.team-1');
@@ -98,6 +105,7 @@ function switchTeam(index) {
     renderSelected();
 }
 
+// picker for grid gonna probably change this alot in the future
 function Choose(id) {
     const currentTeamSet = teams[currentTeam];
     if (currentTeamSet.has(id)) {
@@ -112,13 +120,14 @@ function Choose(id) {
     renderSelected();
     updateTeamUI();
 }
-
+// renderes the list of pokemon on the respective teams
+// add remove button
 function renderSelected() {
     const selectedDiv = document.querySelector(`.team-${currentTeam + 1} .selected`);
     if (!selectedDiv) return;
     const currentTeamSet = teams[currentTeam];
     const items = Array.from(currentTeamSet).map(id => {
-        const p = cache[id];
+        const p = PkmnCache[id];
         return `
             <div class="mini" data-id="${id}"onclick="Pokemoninfo(${id})";>
                 <img src="${p.sprite}" alt="${p.name}" style="width:32px;height:32px;">
@@ -138,35 +147,35 @@ function updateTeamUI() {
     });
 }
 
-// :/ idk rushed
+// :/ idk rushed and temp/unfin
 async function Pokemoninfo(id) {
     await fetchPokemondetails(id);
-    document.getElementById('selectedname').textContent = cache[id].name;
-    document.getElementById('selectedsprite').src = cache[id].sprite;
+    document.getElementById('selectedname').textContent = PkmnCache[id].name;
+    document.getElementById('selectedsprite').src = PkmnCache[id].sprite;
 
 
     // make changeable via method prolly we'll see
     // porbably also use a loop but unsure 
     // placeholder loader atm
-    document.getElementById('Move1').textContent = cache[id].moves[1].name;
-    document.getElementById('Move2').textContent = cache[id].moves[2].name;
-    document.getElementById('Move3').textContent = cache[id].moves[3].name;
-    document.getElementById('Move4').textContent = cache[id].moves[4].name;
+    document.getElementById('Move1').textContent = MoveCache[PkmnCache[id].moves[1].nr].name;
+    document.getElementById('Move1').className = "move type-" + MoveCache[PkmnCache[id].moves[1].nr].type;
+    document.getElementById('Move2').textContent = MoveCache[PkmnCache[id].moves[2].nr].name;
+    document.getElementById('Move2').className = "move type-" + MoveCache[PkmnCache[id].moves[2].nr].type;
+    document.getElementById('Move3').textContent = MoveCache[PkmnCache[id].moves[3].nr].name;
+    document.getElementById('Move3').className = "move type-" + MoveCache[PkmnCache[id].moves[3].nr].type;
+    document.getElementById('Move4').textContent = MoveCache[PkmnCache[id].moves[4].nr].name;
+    document.getElementById('Move4').className = "move type-" + MoveCache[PkmnCache[id].moves[4].nr].type;
+
 
     selectedTypeRow.innerHTML = `
-  <span class="type type-${cache[id].types.type1}">${cache[id].types.type1}</span>
-  ${cache[id].types.type2 ? `<span class="type type-${cache[id].types.type2}">${cache[id].types.type2}</span>` : ""}
+  <span class="type type-${PkmnCache[id].types.type1}">${PkmnCache[id].types.type1}</span>
+  ${PkmnCache[id].types.type2 ? `<span class="type type-${PkmnCache[id].types.type2}">${PkmnCache[id].types.type2}</span>` : ""}
 `;
 
-
-    //document.getElementById('Type1').textContent = cache[id].types.type1;
-    //document.getElementById('Type2').textContent = cache[id].types.type2;
-
-
-    // check if i this loops even good
+    // check if this loops even good
     const statsContainer = document.getElementById('selectedstats');
     statsContainer.textContent = '';
-    for (const [key, value] of Object.entries(cache[id].stats)) {
+    for (const [key, value] of Object.entries(PkmnCache[id].stats)) {
         const statLine = document.createElement('div');
         statLine.textContent = `${key} ${value}`;
         statsContainer.appendChild(statLine);
@@ -178,12 +187,12 @@ async function Pokemoninfo(id) {
 
 // helper function for moves ev/iv and abilities
 async function fetchPokemondetails(id) {
-    if (cache[id].stats) return cache[id];
+    if (PkmnCache[id].stats) return PkmnCache[id];
 
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
     const data = await response.json();
 
-    cache[id].stats = {
+    PkmnCache[id].stats = {
         HP: data.stats[0].base_stat,
         ATK: data.stats[1].base_stat,
         DEF: data.stats[2].base_stat,
@@ -191,13 +200,45 @@ async function fetchPokemondetails(id) {
         SpDEF: data.stats[4].base_stat,
         SPD: data.stats[5].base_stat
     };
-    cache[id].moves = data.moves.map(m => {
+    PkmnCache[id].moves = data.moves.map(m => {
         const urlParts = m.move.url.split('/');
         const moveNumber = urlParts[urlParts.length - 2];
         return {
-            name: m.move.name,
-            nr: moveNumber
+            nr: moveNumber,
         };
     });
+
+    await Promise.all(PkmnCache[id].moves.map(move => fetchMoveInfo(move.nr)));
 }
+
+async function fetchMoveInfo(moveId) {
+    const response = await fetch(`https://pokeapi.co/api/v2/move/${moveId}`);
+    const data = await response.json();
+    // change data structure at some point specifically the ailment stuff i think
+    MoveCache[moveId] = {
+        name: data.name,
+        power: data.power,
+        pp: data.pp,
+        priority: data.priority,
+        stat_changes: data.stat_changes,
+        target: data.target.name,
+        type: data.type.name
+    }
+    // mostly combat used data i think maybe save save when selected but its akward either way
+    MoveCache[moveId].meta = {
+        ailment: data.meta.ailment.name,
+        ailment_chance: data.ailment_chance,
+        catagory: data.meta.catagory.name,
+        crit_rate: data.meta.crit_rate,
+        drain: data.meta.drain,
+        flinch_chance: data.meta.flinch_chance,
+        healing: data.meta.healing,
+        max_hits: data.meta.max_hits,
+        max_turns: data.meta.max_turns,
+        min_hits: data.meta.min_hits,
+        min_turns: data.meta.min_turns,
+        stat_chance: data.meta.stat_chance
+    }
+}
+
 

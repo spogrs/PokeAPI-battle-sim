@@ -1,7 +1,7 @@
 #Panel {
     height: 100%;
-    width: 403px;
-    min-width: 403px;
+    width: 404px;
+    min-width: 404px;
     position: fixed;
     top: 0;
     left: 0;
@@ -56,16 +56,18 @@
 }
 
 .selected .mini {
-    padding: 6px;
+    padding: 2px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid white;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0px;
     margin-bottom: 6px;
     color: white;
+    max-height: 46px;
+    box-sizing: border-box;
 }
 
 /*Maybe use this part to add instead of box select?*/
@@ -73,14 +75,13 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(1, 1fr);
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
-    margin: 0px;
-    padding: 20px;
-    height: 303px;
+
+    margin: 20px;
+
     flex-direction: row;
     background-clip: content-box;
     background-color: white;
+    overflow: hidden;
 }
 
 .profile-container {
@@ -88,39 +89,45 @@
     grid-area: 1 / 1 / 2 / 2;
     /*temp border for visualization*/
     border: 2px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    box-sizing: border-box;
 }
 
 #selectedname {
-    height: 15%;
+    height: 24px;
     text-align: center;
     text-transform: capitalize;
     margin: 0px;
     box-sizing: border-box;
+    border-bottom: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }
 
 #selectedsprite {
-    width: 100%;
-    height: 85%;
+    width: 176px;
+    height: 176px;
     object-fit: contain;
     image-rendering: pixelated;
     box-sizing: border-box;
+    display: block;
+    margin: 0 auto;
 }
 
 .data-container {
+    margin: 0px;
     grid-area: 1 / 2 / 2 / 2;
     /*temp border for visualization*/
     border: 2px solid black;
-}
-
-#selectedTypeRow {
-    min-height: 24px;
-    padding-top: 2px;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
     box-sizing: border-box;
 }
 
-
 #selectedstats {
-    height: 80%;
     text-transform: capitalize;
     cursor: pointer;
     text-align-last: justify;
@@ -128,29 +135,34 @@
 }
 
 #statline ol {
+    margin: 0px;
+    margin-top: 5px;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 #statline li {
-    border: 1px solid black;
     display: grid;
-    /* Første kolonne (teksten) fylder 70px. Anden kolonne (span) tilpasser sig indholdet */
-    grid-template-columns: 50px auto;
+    /* first col text fills 50px. second span autos */
+    /* 40 - 125 px i think is good change length depending on stat*/
+    grid-template-columns: 50px 125px;
     align-items: center;
     padding-left: 2px;
-
 }
 
 #statline span {
     margin-right: 5px;
     padding: 0 10px;
-    border: 2px solid red;
-    border-radius: 15px;
-    background-color: #00ff00;
-    font-weight: bold;
+    border: 0px;
+    border-right: black;
+    border-style: solid;
+    border-radius: 6px;
+    /*Change to depend on the stat level later*/
+    background-image: linear-gradient(to right, rgb(0, 255, 0), rgb(255, 0, 0));
+    font-weight: bolder;
+    align-items: center;
 }
 
 #Nature {
@@ -163,28 +175,33 @@
 
 #Move-container {
     grid-area: 2 / 1 / 3 / 3;
-    grid-template-rows: 2;
-    text-transform: capitalize;
     cursor: pointer;
     border: 2px solid black;
+    border-top: 1px solid black;
     box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+    padding: 4px;
 }
 
 .move {
     color: white;
+    text-transform: capitalize;
     text-align: center;
     border: 1px solid black;
     background-color: rebeccapurple;
     border-radius: 15px;
-    display: inline-block;
-    padding-bottom: 3px;
-    min-width: 48%;
-    font-weight: bold;
     box-sizing: border-box;
-    margin-block: 1px;
-    margin: 2px;
-    min-height: 23px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 24px;
 }
+
 
 
 
@@ -240,14 +257,19 @@
     text-transform: capitalize;
 }
 
+#selectedTypeRow {
+    border-bottom: 2px solid black;
+}
+
 .type-row {
     display: flex;
     flex-wrap: nowrap;
     gap: 4px;
-    align-self: left;
-    padding-right: 5px;
-    padding-left: 5px;
+    align-self: flex-start;
+    justify-content: center;
+    align-items: center;
     max-height: 24px;
+    box-sizing: border-box;
 }
 
 .type {
@@ -258,11 +280,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-bottom: 3px;
-    min-width: 48%;
+    height: 24px;
+    min-width: 68px;
     font-weight: bold;
     text-transform: capitalize;
     box-sizing: border-box;
+    margin-left: 2px;
 }
 
 
@@ -356,4 +379,8 @@
 
 .type-fairy {
     background-color: #D685AD;
+}
+
+.type-null {
+    border-style: hidden;
 }

@@ -19,7 +19,9 @@ async function fetchPokemon(limit = 905) {
         fetchPromises.push(fetchPokemonData(id));
     }
     await Promise.all(fetchPromises);
+    Pokemoninfo(1);
     renderPokemons();
+
 }
 
 // fetch specific basic pokemon data should maybej ust include in the base fetch but we'll see
@@ -67,7 +69,7 @@ function renderPokemons(Type = '', Region = '') {
 
     const currentTeamSet = teams[currentTeam];
     pokegrid.innerHTML = visiblePokemon.map(pokemon => `
-            <div class="card ${currentTeamSet.has(pokemon.id) ? 'selected' : ''}" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
+            <div class="card ${currentTeamSet.has(pokemon.id)}" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
                <h3 style="margin: 0;">${pokemon.name}</h3>
                 <small style="margin: 0;">#${pokemon.id}</small>
                 <img src="${pokemon.sprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
@@ -128,10 +130,12 @@ function renderSelected() {
     const currentTeamSet = teams[currentTeam];
     const items = Array.from(currentTeamSet).map(id => {
         const p = PkmnCache[id];
+
+        // team mini pics change for more functionality later
         return `
             <div class="mini" data-id="${id}"onclick="Pokemoninfo(${id})";>
-                <img src="${p.sprite}" alt="${p.name}" style="width:32px;height:32px;">
-                <span>${p.name}</span>
+                <img src="${p.sprite}" alt="${p.name}" style="width:40px;height:40px;">
+                <span style="text-transform: capitalize;">${p.name}</span>
             </div>
         `;
     }).join('');
@@ -157,6 +161,7 @@ async function Pokemoninfo(id) {
     // make changeable via method prolly we'll see
     // porbably also use a loop but unsure 
     // placeholder loader atm
+
     document.getElementById('Move1').textContent = MoveCache[PkmnCache[id].moves[1].nr].name;
     document.getElementById('Move1').className = "move type-" + MoveCache[PkmnCache[id].moves[1].nr].type;
     document.getElementById('Move2').textContent = MoveCache[PkmnCache[id].moves[2].nr].name;
@@ -169,17 +174,14 @@ async function Pokemoninfo(id) {
 
     selectedTypeRow.innerHTML = `
   <span class="type type-${PkmnCache[id].types.type1}">${PkmnCache[id].types.type1}</span>
-  ${PkmnCache[id].types.type2 ? `<span class="type type-${PkmnCache[id].types.type2}">${PkmnCache[id].types.type2}</span>` : ""}
+  <span class="type type-${PkmnCache[id].types.type2}">${PkmnCache[id].types.type2}</span>
 `;
 
-    // check if this loops even good
     for (const [key, value] of Object.entries(PkmnCache[id].stats)) {
         document.getElementById(key + 'stat').textContent = `${value}`;
     }
-    // add type stuff
 
 }
-
 
 async function fetchPokemondetails(id) {
     if (PkmnCache[id].stats) return PkmnCache[id];
@@ -209,9 +211,13 @@ async function fetchPokemondetails(id) {
 }
 
 async function fetchMoveInfo(moveId) {
+    if (MoveCache[moveId]) return MoveCache[moveId];
     const response = await fetch(`https://pokeapi.co/api/v2/move/${moveId}`);
     const data = await response.json();
+
+
     // change data structure at some point specifically the ailment stuff i think
+    // store more data in the sub folders still but this is good start
     MoveCache[moveId] = {
         name: data.name,
         power: data.power,
@@ -222,20 +228,22 @@ async function fetchMoveInfo(moveId) {
         type: data.type.name
     }
     // mostly combat used data i think maybe save save when selected but its akward either way
-    MoveCache[moveId].meta = {
+    // commented out untill reimplimentation caused too much load lag for the render probably load detail on move select dropdown
+    /*MoveCache[moveId].meta = {
         ailment: data.meta.ailment.name,
         ailment_chance: data.ailment_chance,
-        catagory: data.meta.catagory.name,
+        category: data.meta.category.name,
         crit_rate: data.meta.crit_rate,
         drain: data.meta.drain,
         flinch_chance: data.meta.flinch_chance,
         healing: data.meta.healing,
-        max_hits: data.meta.max_hits,
-        max_turns: data.meta.max_turns,
-        min_hits: data.meta.min_hits,
-        min_turns: data.meta.min_turns,
+        max_hits: data.meta.max_hits ?? null,
+        max_turns: data.meta.max_turns ?? null,
+        min_hits: data.meta.min_hits ?? null,
+        min_turns: data.meta.min_turns ?? null,
         stat_chance: data.meta.stat_chance
-    }
+    }  */
+    return MoveCache[moveId];
 }
 
 

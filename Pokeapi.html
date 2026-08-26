@@ -90,10 +90,26 @@
 
             </div>
             <div id="Move-container">
-                <span id="Move1" class="move" onclick="changemove(1)"></span>
-                <span id="Move2" class="move" onclick="changemove(2)"></span>
-                <span id="Move3" class="move" onclick="changemove(3)"></span>
-                <span id="Move4" class="move" onclick="changemove(4)"></span>
+                <div class="move-slot">
+                    <span id="Move1" class="move" onclick="changemove(1)"></span>
+                    <select id="MoveSelect1" class="move-select" size="6" aria-label="Choose move 1" hidden
+                        onchange="changeMoveSelection(1, this.value)"></select>
+                </div>
+                <div class="move-slot">
+                    <span id="Move2" class="move" onclick="changemove(2)"></span>
+                    <select id="MoveSelect2" class="move-select" size="6" aria-label="Choose move 2" hidden
+                        onchange="changeMoveSelection(2, this.value)"></select>
+                </div>
+                <div class="move-slot">
+                    <span id="Move3" class="move" onclick="changemove(3)"></span>
+                    <select id="MoveSelect3" class="move-select" size="6" aria-label="Choose move 3" hidden
+                        onchange="changeMoveSelection(3, this.value)"></select>
+                </div>
+                <div class="move-slot">
+                    <span id="Move4" class="move" onclick="changemove(4)"></span>
+                    <select id="MoveSelect4" class="move-select" size="6" aria-label="Choose move 4" hidden
+                        onchange="changeMoveSelection(4, this.value)"></select>
+                </div>
             </div>
 
         </section>

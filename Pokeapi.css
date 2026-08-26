@@ -114,7 +114,9 @@
     flex-direction: row;
     background-clip: content-box;
     background-color: white;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+    z-index: 10;
 }
 
 .profile-container {
@@ -208,7 +210,6 @@
 
 #Move-container {
     grid-area: 2 / 1 / 3 / 3;
-    cursor: pointer;
     border: 2px solid black;
     border-top: 1px solid black;
     box-sizing: border-box;
@@ -219,12 +220,17 @@
     padding: 4px;
 }
 
+.move-slot {
+    position: relative;
+    min-width: 0;
+}
+
 .move {
     color: white;
     text-transform: capitalize;
     text-align: center;
     border: 1px solid black;
-    background-color: rebeccapurple;
+    background-color: darkgray;
     border-radius: 15px;
     box-sizing: border-box;
     font-weight: bold;
@@ -233,14 +239,26 @@
     justify-content: center;
     width: 100%;
     min-height: 24px;
+    cursor: pointer;
 }
 
+.move-select {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    min-height: 24px;
+    max-height: 484px;
+    overflow-y: auto;
+    font: inherit;
+    text-transform: capitalize;
+    cursor: pointer;
+}
 
-
-
-
-
-
+.moveoption {
+    margin-bottom: 2px;
+}
 
 /* Maybe use for the battle aswell */
 #Pokemon-Container {

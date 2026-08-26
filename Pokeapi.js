@@ -207,6 +207,7 @@ async function Pokemoninfo(id) {
     // highlight selected probably
     SelectedPokemon.pokemonId = id;
     SelectedPokemon.team = currentTeam;
+    closeMoveDropdowns();
 
     await fetchPokemondetails(id);
     document.getElementById('selectedname').textContent = PkmnCache[id].name;
@@ -224,7 +225,6 @@ async function Pokemoninfo(id) {
 
         moveElement.textContent = moveData.name;
         moveElement.className = `move type-${moveData.type}`;
-        moveElement.onclick = () => changemove(index + 1);
     });
 
     selectedTypeRow.innerHTML = `
@@ -303,6 +303,62 @@ async function fetchMoveInfo(moveId) {
     return MoveCache[moveId];
 }
 
-function changemove(movenr) {
 
+
+// DOSENT WORK IF SWAPPED TEAM BUT POKE IS ON OTHER TEAM FIX MAYB
+function changemove(movenr) {
+    // find  pokemon currently being shown in active team
+    const pokemon = teams[currentTeam].find(pokemon => pokemon.id === SelectedPokemon.pokemonId);
+    if (!pokemon) return;
+
+    // close another dropdown first so only one can be open at a time
+    closeMoveDropdowns();
+
+    // get evry move this pokemon can use from cache
+    const availableMoves = PkmnCache[pokemon.id].moves;
+
+    // keep already selected moves out so the pokemon cannot have duplicates
+    const selectedMoveIds = pokemon.moves.map(move => move.nr);
+
+    // get the dropdown from the html for the move that was clicked
+    const dropdown = document.getElementById(`MoveSelect${movenr}`);
+
+    // remove moves already used in one of the slots
+    const selectableMoves = availableMoves
+        .filter(move => !selectedMoveIds.includes(move.nr));
+
+    // checking for empty move list
+    if (selectableMoves.length === 0) return;
+
+    // make the list fit options up to the maximum set in the css
+    dropdown.size = Math.max(1, selectableMoves.length);
+
+    // turn move data into html options for  dropdown
+    dropdown.innerHTML = selectableMoves
+        .map(move =>
+            `<option class="moveoption type-${MoveCache[move.nr].type}" value="${move.nr}">${MoveCache[move.nr].name}</option>`
+        ).join('');
+
+    // show dropdown and focus it
+    dropdown.hidden = false;
+    dropdown.focus();
+}
+
+function closeMoveDropdowns() { document.querySelectorAll('.move-select').forEach(dropdown => dropdown.hidden = true); }
+document.addEventListener('click', event => {
+    if (!event.target.closest('.move-slot')) {
+        closeMoveDropdowns();
+    }
+});
+
+function changeMoveSelection(movenr, moveId) {
+    const pokemon = teams[currentTeam].find(pokemon => pokemon.id === SelectedPokemon.pokemonId);
+    if (!pokemon) return;
+
+    const newMove = PkmnCache[pokemon.id].moves.find(move => move.nr === moveId);
+    if (!newMove) return;
+
+    pokemon.moves[movenr - 1] = newMove;
+    closeMoveDropdowns();
+    Pokemoninfo(pokemon.id);
 }

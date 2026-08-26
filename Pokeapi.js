@@ -4,11 +4,23 @@ const MoveCache = {};
 // mayb rename but use for damage relations in the https://pokeapi.co/api/v2/type/1/ api
 const TypeCache = {};
 
+let SelectedPokemon = {
+    team: null,
+    pokemonId: null
+};
+
+
+// i did this at the start reconsider later probably wastefull consts
 const pokegrid = document.querySelector('.pokegrid');
 const details = document.getElementById('details');
 
 const maxTeamSize = 6;
-const teams = [new Set(), new Set()];
+const teams = [[], []];
+
+/*
+teams[1][4] 1 = tem 4 = pkmn slot -1 both ofc
+*/
+
 let currentTeam = 0;
 
 // if theres a way to find types easier it would save alot of api calls
@@ -18,8 +30,10 @@ async function fetchPokemon(limit = 905) {
     for (let id = 1; id <= limit; id++) {
         fetchPromises.push(fetchPokemonData(id));
     }
+
     await Promise.all(fetchPromises);
-    Pokemoninfo(1);
+    // loads pkmn 1 just to fill out out consider changing
+    // Pokemoninfo(1);
     renderPokemons();
 
 }
@@ -67,9 +81,8 @@ function renderPokemons(Type = '', Region = '') {
         })
         .sort((a, b) => a.id - b.id);
 
-    const currentTeamSet = teams[currentTeam];
     pokegrid.innerHTML = visiblePokemon.map(pokemon => `
-            <div class="card ${currentTeamSet.has(pokemon.id)}" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
+            <div class="card" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
                <h3 style="margin: 0;">${pokemon.name}</h3>
                 <small style="margin: 0;">#${pokemon.id}</small>
                 <img src="${pokemon.sprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
@@ -108,69 +121,111 @@ function switchTeam(index) {
 }
 
 // picker for grid gonna probably change this alot in the future
-function Choose(id) {
-    const currentTeamSet = teams[currentTeam];
-    if (currentTeamSet.has(id)) {
-        currentTeamSet.delete(id);
+async function Choose(id) {
+    const currentTeamList = teams[currentTeam];
+
+    const existingIndex = currentTeamList.findIndex(p => p.id === id);
+
+    if (existingIndex !== -1) {
+        currentTeamList.splice(existingIndex, 1);
     } else {
-        if (currentTeamSet.size < maxTeamSize)
-            currentTeamSet.add(id);
+        if (currentTeamList.length < maxTeamSize) {
+            const baseData = PkmnCache[id];
+            await fetchPokemondetails(id);
+            currentTeamList.push({
+                id: id,
+                name: baseData.name,
+                moves: baseData.moves.slice(0, 4) // Klar til max 4 angreb
+
+            });
+            console.log('Selected Pokemon moves:', currentTeamList[currentTeamList.length - 1].moves);
+        } else return
     }
-    const type = document.getElementById('type-select') ? document.getElementById('type-select').value : '';
-    const region = document.getElementById('Region-select') ? document.getElementById('Region-select').value : '';
-    renderPokemons(type, region);
+    Pokemoninfo(id);
     renderSelected();
     updateTeamUI();
 }
+
+function RemovePokemon(teamIndex, id) {
+    const teamList = teams[teamIndex];
+    const pokemonIndex = teamList.findIndex(pokemon => pokemon.id === id);
+
+    if (pokemonIndex !== -1) {
+        teamList.splice(pokemonIndex, 1);
+    }
+
+    if (SelectedPokemon.team === teamIndex && SelectedPokemon.pokemonId === id) {
+        SelectedPokemon = { team: null, pokemonId: null };
+    }
+
+    renderSelected();
+    updateTeamUI();
+}
+
 // renderes the list of pokemon on the respective teams
 // add remove button
 function renderSelected() {
-    const selectedDiv = document.querySelector(`.team-${currentTeam + 1} .selected`);
-    if (!selectedDiv) return;
-    const currentTeamSet = teams[currentTeam];
-    const items = Array.from(currentTeamSet).map(id => {
-        const p = PkmnCache[id];
+    teams.forEach((teamList, teamIndex) => {
+        const selectedDiv = document.querySelector(`.team-${teamIndex + 1} .selected`);
+        if (!selectedDiv) return;
 
-        // team mini pics change for more functionality later
-        return `
-            <div class="mini" data-id="${id}"onclick="Pokemoninfo(${id})";>
-                <img src="${p.sprite}" alt="${p.name}" style="width:40px;height:40px;">
-                <span style="text-transform: capitalize;">${p.name}</span>
-            </div>
-        `;
-    }).join('');
-    selectedDiv.innerHTML = items;
+        const items = teamList.map(pokemonOnTeam => {
+            const id = pokemonOnTeam.id;
+            const p = PkmnCache[id];
+
+            const isSelected = SelectedPokemon.pokemonId === id && SelectedPokemon.team === teamIndex;
+
+            return `
+                <div class="mini ${isSelected ? 'selected' : ''}" data-id="${id}" 
+                     onclick="event.stopPropagation(); SelectedPokemon.pokemonId = ${id}; SelectedPokemon.team = ${teamIndex}; switchTeam(${teamIndex + 1}); Pokemoninfo(${id});">
+                    <img src="${p.sprite}" alt="${p.name}" style="width:40px;height:40px;">
+                    <span style="text-transform: capitalize;">${p.name}</span>
+                    <button class="mini-remove" type="button" aria-label="Remove ${p.name}"
+                        onclick="event.stopPropagation(); RemovePokemon(${teamIndex}, ${id});"><span class="mini-remove-text">x</span></button>
+                </div>
+            `;
+        }).join('');
+
+        selectedDiv.innerHTML = items;
+    });
 }
+
 // onclick="Choose(${pokemon.id})
 function updateTeamUI() {
     teams.forEach((team, i) => {
         const status = document.querySelector(`.team-${i + 1} .team-status`);
         if (status) {
-            status.textContent = `Team ${i + 1}: ${team.size}/${maxTeamSize}`;
+            status.textContent = `Team ${i + 1}: ${team.length}/${maxTeamSize}`;
         }
     });
+
 }
 
 // :/ idk rushed and temp/unfin
 async function Pokemoninfo(id) {
+
+    // highlight selected probably
+    SelectedPokemon.pokemonId = id;
+    SelectedPokemon.team = currentTeam;
+
     await fetchPokemondetails(id);
     document.getElementById('selectedname').textContent = PkmnCache[id].name;
     document.getElementById('selectedsprite').src = PkmnCache[id].sprite;
-
+    const selectedPokemon = teams[currentTeam].find(pokemon => pokemon.id === id);
+    const selectedMoves = selectedPokemon ? selectedPokemon.moves : PkmnCache[id].moves.slice(0, 4);
 
     // make changeable via method prolly we'll see
     // porbably also use a loop but unsure 
     // placeholder loader atm
 
-    document.getElementById('Move1').textContent = MoveCache[PkmnCache[id].moves[1].nr].name;
-    document.getElementById('Move1').className = "move type-" + MoveCache[PkmnCache[id].moves[1].nr].type;
-    document.getElementById('Move2').textContent = MoveCache[PkmnCache[id].moves[2].nr].name;
-    document.getElementById('Move2').className = "move type-" + MoveCache[PkmnCache[id].moves[2].nr].type;
-    document.getElementById('Move3').textContent = MoveCache[PkmnCache[id].moves[3].nr].name;
-    document.getElementById('Move3').className = "move type-" + MoveCache[PkmnCache[id].moves[3].nr].type;
-    document.getElementById('Move4').textContent = MoveCache[PkmnCache[id].moves[4].nr].name;
-    document.getElementById('Move4').className = "move type-" + MoveCache[PkmnCache[id].moves[4].nr].type;
+    selectedMoves.forEach((move, index) => {
+        const moveElement = document.getElementById(`Move${index + 1}`);
+        const moveData = MoveCache[move.nr];
 
+        moveElement.textContent = moveData.name;
+        moveElement.className = `move type-${moveData.type}`;
+        moveElement.onclick = () => changemove(index + 1);
+    });
 
     selectedTypeRow.innerHTML = `
   <span class="type type-${PkmnCache[id].types.type1}">${PkmnCache[id].types.type1}</span>
@@ -204,6 +259,9 @@ async function fetchPokemondetails(id) {
             nr: moveNumber,
         };
     });
+
+
+
     // THIS IS REALYL BAD I NEED TO FIX IT 
     // fix it by changin to only load 4 selected mvoes and then run a fetch on move change?
     // would have to fetch type again though :?
@@ -214,7 +272,6 @@ async function fetchMoveInfo(moveId) {
     if (MoveCache[moveId]) return MoveCache[moveId];
     const response = await fetch(`https://pokeapi.co/api/v2/move/${moveId}`);
     const data = await response.json();
-
 
     // change data structure at some point specifically the ailment stuff i think
     // store more data in the sub folders still but this is good start
@@ -246,4 +303,6 @@ async function fetchMoveInfo(moveId) {
     return MoveCache[moveId];
 }
 
+function changemove(movenr) {
 
+}

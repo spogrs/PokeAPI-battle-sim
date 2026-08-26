@@ -90,17 +90,17 @@
 
             </div>
             <div id="Move-container">
-                <span id="Move1" class="move"></span>
-                <span id="Move2" class="move"></span>
-                <span id="Move3" class="move"></span>
-                <span id="Move4" class="move"></span>
+                <span id="Move1" class="move" onclick="changemove(1)"></span>
+                <span id="Move2" class="move" onclick="changemove(2)"></span>
+                <span id="Move3" class="move" onclick="changemove(3)"></span>
+                <span id="Move4" class="move" onclick="changemove(4)"></span>
             </div>
 
         </section>
 
 
         <section id="teams">
-            <div class="team team-1" onclick="switchTeam(1)">
+            <div class="team team-1 active" onclick="switchTeam(1)">
                 <div class="team-status">Team 1: 0/6</div>
                 <div class="selected"></div>
             </div>
@@ -111,12 +111,8 @@
             </div>
         </section>
 
-        <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
-        <button onclick="toggleContainer('Pokemon-Container', 'open');" style="position: fixed;">pick popout
-            temp</button>
-        <br>
-        <br>
-        <button onclick="Pokemoninfo(1);">Debug load pokemon</button>
+
+
 
 
         <footer id="sidefooter">
@@ -129,6 +125,10 @@
                 </svg>
                 <span style="font-weight: bold; color: white;">GitHub</span>
             </a>
+            <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
+            <button onclick="toggleContainer('Pokemon-Container', 'open');">pick popout
+                temp</button>
+            <button onclick="Choose(Math.floor(Math.random() * 1000) + 1);">Debug Add random</button>
         </footer>
 
 

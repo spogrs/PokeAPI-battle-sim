@@ -10,6 +10,13 @@
     background-image: linear-gradient(to left, rgb(160, 160, 160), rgb(133, 133, 133), rgb(92, 92, 92));
 }
 
+#TeamBuilder.hide {
+    visibility: hidden;
+    /*just temp to be able to hide*/
+}
+
+/* display:none; panel toggle for battle? */
+
 #sidefooter {
     position: fixed;
     bottom: 0px;
@@ -24,6 +31,7 @@
     flex-direction: row;
     gap: 20px;
     padding: 20px;
+
 }
 
 .team {
@@ -72,7 +80,7 @@
     position: relative;
 }
 
-.mini.selected {
+.active .mini.selected {
     background: rgba(255, 255, 255, 0.4);
     border-color: #fff;
     cursor: default;
@@ -108,15 +116,18 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(1, 1fr);
-
     margin: 20px;
-
     flex-direction: row;
     background-clip: content-box;
     background-color: white;
     overflow: visible;
     position: relative;
     z-index: 10;
+    visibility: hidden;
+}
+
+#pokemoninfo.active {
+    visibility: visible;
 }
 
 .profile-container {
@@ -189,13 +200,13 @@
 
 #statline span {
     margin-right: 5px;
-    padding: 0 10px;
+    padding: 0 4px;
     border: 0px;
     border-right: black;
     border-style: solid;
     border-radius: 6px;
     /*Change to depend on the stat level later*/
-    background-image: linear-gradient(to right, rgb(0, 255, 0), rgb(255, 0, 0));
+    background-image: linear-gradient(to right, #00ff00, rgb(255, 0, 0));
     font-weight: bolder;
     align-items: center;
 }
@@ -249,7 +260,7 @@
     z-index: 100;
     width: 100%;
     min-height: 24px;
-    max-height: 484px;
+    max-height: 470px;
     overflow-y: auto;
     font: inherit;
     text-transform: capitalize;
@@ -258,6 +269,8 @@
 
 .moveoption {
     margin-bottom: 2px;
+    border: 1px solid black;
+    border-radius: 15px;
 }
 
 /* Maybe use for the battle aswell */
@@ -339,6 +352,14 @@
     margin-left: 2px;
 }
 
+#type-select {
+    border-radius: 25px;
+}
+
+#Region-select {
+    border-radius: 25px;
+}
+
 
 /* Select  highlight */
 .card.selected {
@@ -354,7 +375,49 @@
     text-transform: capitalize;
 }
 
+#battleContainer {
+    padding-right: 1px;
+    position: fixed;
+    top: 0;
+    right: -100vw;
+    bottom: 0;
+    z-index: 1;
+    background: grey;
+    width: calc(100vw - 403px);
+    max-width: calc(100vw - 403px);
+    min-width: 148px;
+    transition: right 0.2s ease-in-out;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
+#battleContainer.open {
+    right: 0;
+}
+
+
+
+
+#startbutton {
+    background-color: red;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+
+    margin-left: 107px;
+    width: 174px;
+
+}
+
+#startbutton:hover {
+    background-color: green;
+    box-shadow: 3px 3px 2px 1px rgba(0, 0, 0, 0.2);
+}
 
 
 

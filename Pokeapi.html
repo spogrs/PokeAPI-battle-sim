@@ -7,129 +7,145 @@
     <title>PokeAPI</title>
     <link rel="stylesheet" href="Pokeapi.css">
     <script src="Pokeapi.js" defer></script>
-
 </head>
 
 
-<body onload="fetchPokemon()">
+<body onload="fetchPokemon(905)">
 
     <!-- Make the side panel and menu here-->
     <div id=Panel>
         <header>POKEMON</header><br>
-        <section id="Sorting">
-            <div>Sorting</div><br>
+        <section id="TeamBuilder">
+            <section id="Sorting">
+                <div>Sorting</div><br>
 
-            <div id="Sort by region">
-                <label for="Region-select">Filter by region:</label>
-                <select id="Region-select"
-                    onchange="renderPokemons(document.getElementById('type-select').value, this.value)">
-                    <option value="">None</option>
-                    <option value="kanto">Kanto</option>
-                    <option value="johto">Johto</option>
-                    <option value="hoenn">Hoenn</option>
-                    <option value="sinnoh">Sinnoh</option>
-                    <option value="unova">Unova</option>
-                    <option value="kalos">Kalos</option>
-                    <option value="alola">Alola</option>
-                    <option value="galar">Galar</option>
-                </select>
-            </div>
+                <div id="Sort by region">
+                    <label for="Region-select">Filter by region:</label>
+                    <select id="Region-select"
+                        onchange="renderPokemons(document.getElementById('type-select').value, this.value)">
+                        <option value="">None</option>
+                        <option value="kanto">Kanto</option>
+                        <option value="johto">Johto</option>
+                        <option value="hoenn">Hoenn</option>
+                        <option value="sinnoh">Sinnoh</option>
+                        <option value="unova">Unova</option>
+                        <option value="kalos">Kalos</option>
+                        <option value="alola">Alola</option>
+                        <option value="galar">Galar</option>
+                    </select>
+                </div>
 
-            <div id="Sort by type">
-                <label for="type-select">Filter by Type:</label>
-                <select id="type-select"
-                    onchange="renderPokemons(this.value, document.getElementById('Region-select').value)">
-                    <option value="">None</option>
-                    <option value="bug">Bug</option>
-                    <option value="dark">Dark</option>
-                    <option value="dragon">Dragon</option>
-                    <option value="electric">Electric</option>
-                    <option value="fairy">Fairy</option>
-                    <option value="fighting">Fighting</option>
-                    <option value="fire">Fire</option>
-                    <option value="flying">Flying</option>
-                    <option value="ghost">Ghost</option>
-                    <option value="grass">Grass</option>
-                    <option value="ground">Ground</option>
-                    <option value="ice">Ice</option>
-                    <option value="normal">Normal</option>
-                    <option value="poison">Poison</option>
-                    <option value="psychic">Psychic</option>
-                    <option value="rock">Rock</option>
-                    <option value="steel">Steel</option>
-                    <option value="water">Water</option>
-                </select>
-            </div>
+                <div id="Sort by type">
+                    <label for="type-select">Filter by Type:</label>
+                    <select id="type-select"
+                        onchange="renderPokemons(this.value, document.getElementById('Region-select').value)">
+                        <option value="">None</option>
+                        <option class="type type-normal" value="normal">Normal</option>
+                        <option class="type type-fire" value="fire">Fire</option>
+                        <option class="type type-water" value="water">Water</option>
+                        <option class="type type-electric" value="electric">Electric</option>
+                        <option class="type type-grass" value="grass">Grass</option>
+                        <option class="type type-ice" value="ice">Ice</option>
+                        <option class="type type-fighting" value="fighting">Fighting</option>
+                        <option class="type type-poison" value="poison">Poison</option>
+                        <option class="type type-ground" value="ground">Ground</option>
+                        <option class="type type-flying" value="flying">Flying</option>
+                        <option class="type type-psychic" value="psychic">Psychic</option>
+                        <option class="type type-bug" value="bug">Bug</option>
+                        <option class="type type-rock" value="rock">Rock</option>
+                        <option class="type type-ghost" value="ghost">Ghost</option>
+                        <option class="type type-dragon" value="dragon">Dragon</option>
+                        <option class="type type-dark" value="dark">Dark</option>
+                        <option class="type type-steel" value="steel">Steel</option>
+                        <option class="type type-fairy" value="fairy">Fairy</option>
+                    </select>
+                </div>
+
+            </section>
+
+            <section id="pokemoninfo">
+                <div class="profile-container">
+                    <h2 id="selectedname"></h2>
+                    <img src="" id="selectedsprite" class="hidden">
+                </div>
+
+                <div class="data-container">
+                    <div id="selectedTypeRow" class="type-row">
+                        <span id="Type1" class="type type-null"></span>
+                        <span id="Type2" class="type type-null"></span>
+                    </div>
+
+                    <div id="statline">
+                        <ol style="list-style: none;">
+                            <li>HP<span id="HPstat">0</span></li>
+                            <li>ATK<span id="ATKstat">0</span></li>
+                            <li>DEF<span id="DEFstat">0</span></li>
+                            <li>SpATK<span id="SpATKstat">0</span></li>
+                            <li>SpDEF<span id="SpDEFstat">0</span></li>
+                            <li>SPD<span id="SPDstat">0</span></li>
+                            <li>BST<span id="BSTstat">0</span></li>
+                        </ol>
+                    </div>
+
+                </div>
+                <div id="Move-container">
+                    <div class="move-slot">
+                        <span id="Move1" class="move" onclick="changemove(1)"></span>
+                        <select id="MoveSelect1" class="move-select" size="6" aria-label="Choose move 1" hidden
+                            onchange="changeMoveSelection(1, this.value)"></select>
+                    </div>
+                    <div class="move-slot">
+                        <span id="Move2" class="move" onclick="changemove(2)"></span>
+                        <select id="MoveSelect2" class="move-select" size="6" aria-label="Choose move 2" hidden
+                            onchange="changeMoveSelection(2, this.value)"></select>
+                    </div>
+                    <div class="move-slot">
+                        <span id="Move3" class="move" onclick="changemove(3)"></span>
+                        <select id="MoveSelect3" class="move-select" size="6" aria-label="Choose move 3" hidden
+                            onchange="changeMoveSelection(3, this.value)"></select>
+                    </div>
+                    <div class="move-slot">
+                        <span id="Move4" class="move" onclick="changemove(4)"></span>
+                        <select id="MoveSelect4" class="move-select" size="6" aria-label="Choose move 4" hidden
+                            onchange="changeMoveSelection(4, this.value)"></select>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <section id="teams">
+                <div class="team team-1 active" onclick="currentTeam !== 0 && switchTeam(1)">
+                    <div class="team-status">Team 1: 0/6</div>
+                    <div class="selected"></div>
+                </div>
+
+                <div class="team team-2" onclick="currentTeam !== 1 && switchTeam(2)">
+                    <div class="team-status">Team 2: 0/6</div>
+                    <div class="selected"></div>
+                </div>
+            </section>
+
+            <button onclick="startbattle()" id="startbutton">Start Battle</button>
+
+
 
         </section>
-
-        <section id="pokemoninfo">
-            <div class="profile-container">
-                <h2 id="selectedname"></h2>
-                <img src="" id="selectedsprite" class="hidden">
-            </div>
-
-            <div class="data-container">
-                <div id="selectedTypeRow" class="type-row">
-                    <span id="Type1" class="type type-null"></span>
-                    <span id="Type2" class="type type-null"></span>
-                </div>
-
-                <div id="statline">
-                    <ol style="list-style: none;">
-                        <li>HP<span id="HPstat">0</span></li>
-                        <li>ATK<span id="ATKstat">0</span></li>
-                        <li>DEF<span id="DEFstat">0</span></li>
-                        <li>SpATK<span id="SpATKstat">0</span></li>
-                        <li>SpDEF<span id="SpDEFstat">0</span></li>
-                        <li>SPD<span id="SPDstat">0</span></li>
-                    </ol>
-                </div>
+        <section id="battleContainer">
 
 
 
-            </div>
-            <div id="Move-container">
-                <div class="move-slot">
-                    <span id="Move1" class="move" onclick="changemove(1)"></span>
-                    <select id="MoveSelect1" class="move-select" size="6" aria-label="Choose move 1" hidden
-                        onchange="changeMoveSelection(1, this.value)"></select>
-                </div>
-                <div class="move-slot">
-                    <span id="Move2" class="move" onclick="changemove(2)"></span>
-                    <select id="MoveSelect2" class="move-select" size="6" aria-label="Choose move 2" hidden
-                        onchange="changeMoveSelection(2, this.value)"></select>
-                </div>
-                <div class="move-slot">
-                    <span id="Move3" class="move" onclick="changemove(3)"></span>
-                    <select id="MoveSelect3" class="move-select" size="6" aria-label="Choose move 3" hidden
-                        onchange="changeMoveSelection(3, this.value)"></select>
-                </div>
-                <div class="move-slot">
-                    <span id="Move4" class="move" onclick="changemove(4)"></span>
-                    <select id="MoveSelect4" class="move-select" size="6" aria-label="Choose move 4" hidden
-                        onchange="changeMoveSelection(4, this.value)"></select>
-                </div>
-            </div>
+            <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                deserunt mollit anim id est laborum.</div>
 
-        </section>
-
-
-        <section id="teams">
-            <div class="team team-1 active" onclick="switchTeam(1)">
-                <div class="team-status">Team 1: 0/6</div>
-                <div class="selected"></div>
-            </div>
-
-            <div class="team team-2" onclick="switchTeam(2)">
-                <div class="team-status">Team 2: 0/6</div>
-                <div class="selected"></div>
-            </div>
-        </section>
 
 
 
 
+        </section>
 
         <footer id="sidefooter">
             <a href="https://github.com/spogrs/PokeAPI-battle-sim">
@@ -151,15 +167,9 @@
     </div>
 
 
-
-
-
-
-
-
     <!-- Pokemon grid container and cards-->
     <main>
-        <div id="Pokemon-Container">
+        <div id="Pokemon-Container" class="open">
             <div class="pokegrid"></div>
         </div>
     </main>

@@ -18,19 +18,29 @@ const maxTeamSize = 6;
 const teams = [[], []];
 
 /*
-teams[1][4] 1 = tem 4 = pkmn slot -1 both ofc
+teams[1][4] 1 = tem 2
+4 = pkmn slot 
+-1 both ofc
 */
 
 let currentTeam = 0;
 
+let infovisible = false;
 // if theres a way to find types easier it would save alot of api calls
 // mayb load first 50-60 and then afterwards do the rest?
-async function fetchPokemon(limit = 905) {
+async function fetchPokemon(limit) {
     const fetchPromises = [];
-    for (let id = 1; id <= limit; id++) {
+    const initalLimit = 50;
+
+    for (let id = 1; id <= Math.min(initalLimit, limit); id++) {
         fetchPromises.push(fetchPokemonData(id));
     }
+    await Promise.all(fetchPromises);
+    renderPokemons();
 
+    for (let id = initalLimit + 1; id <= limit; id++) {
+        fetchPromises.push(fetchPokemonData(id));
+    }
     await Promise.all(fetchPromises);
     // loads pkmn 1 just to fill out out consider changing
     // Pokemoninfo(1);
@@ -104,10 +114,11 @@ function toggleContainer(containerId, Toggle) {
         container.classList.toggle(Toggle);
     }
 }
-
 // basic team selection swapper using current team index 
 function switchTeam(index) {
-    currentTeam = index - 1
+    currentTeam = index - 1;
+    SelectedPokemon = { team: null, pokemonId: null };
+    renderSelected();
     const team1 = document.querySelector('.team-1');
     const team2 = document.querySelector('.team-2');
     if (index === 1) {
@@ -117,7 +128,10 @@ function switchTeam(index) {
         team1.classList.remove('active');
         team2.classList.add('active');
     }
-    renderSelected();
+    if (infovisible) {
+        infovisible = false;
+        document.querySelector('#pokemoninfo').classList.remove('active');
+    }
 }
 
 // picker for grid gonna probably change this alot in the future
@@ -128,20 +142,21 @@ async function Choose(id) {
 
     if (existingIndex !== -1) {
         currentTeamList.splice(existingIndex, 1);
-    } else {
+        infovisible = false;
+        document.querySelector('#pokemoninfo').classList.remove('active');
+    } else
         if (currentTeamList.length < maxTeamSize) {
             const baseData = PkmnCache[id];
             await fetchPokemondetails(id);
             currentTeamList.push({
                 id: id,
                 name: baseData.name,
-                moves: baseData.moves.slice(0, 4) // Klar til max 4 angreb
-
+                moves: baseData.moves.slice(0, 4)
             });
             console.log('Selected Pokemon moves:', currentTeamList[currentTeamList.length - 1].moves);
+            Pokemoninfo(id);
         } else return
-    }
-    Pokemoninfo(id);
+
     renderSelected();
     updateTeamUI();
 }
@@ -156,6 +171,11 @@ function RemovePokemon(teamIndex, id) {
 
     if (SelectedPokemon.team === teamIndex && SelectedPokemon.pokemonId === id) {
         SelectedPokemon = { team: null, pokemonId: null };
+        if (infovisible) {
+            infovisible = false;
+            document.querySelector('#pokemoninfo').classList.remove('active');
+        }
+
     }
 
     renderSelected();
@@ -176,8 +196,8 @@ function renderSelected() {
             const isSelected = SelectedPokemon.pokemonId === id && SelectedPokemon.team === teamIndex;
 
             return `
-                <div class="mini ${isSelected ? 'selected' : ''}" data-id="${id}" 
-                     onclick="event.stopPropagation(); SelectedPokemon.pokemonId = ${id}; SelectedPokemon.team = ${teamIndex}; switchTeam(${teamIndex + 1}); Pokemoninfo(${id});">
+                 <div class="mini ${isSelected ? 'selected' : ''}" data-id="${id}" 
+                     onclick="event.stopPropagation(); currentTeam !== ${teamIndex} && switchTeam(${teamIndex + 1}); SelectedPokemon.pokemonId = ${id}; SelectedPokemon.team = ${teamIndex}; renderSelected(); Pokemoninfo(${id});">
                     <img src="${p.sprite}" alt="${p.name}" style="width:40px;height:40px;">
                     <span style="text-transform: capitalize;">${p.name}</span>
                     <button class="mini-remove" type="button" aria-label="Remove ${p.name}"
@@ -207,7 +227,6 @@ async function Pokemoninfo(id) {
     // highlight selected probably
     SelectedPokemon.pokemonId = id;
     SelectedPokemon.team = currentTeam;
-    closeMoveDropdowns();
 
     await fetchPokemondetails(id);
     document.getElementById('selectedname').textContent = PkmnCache[id].name;
@@ -231,11 +250,31 @@ async function Pokemoninfo(id) {
   <span class="type type-${PkmnCache[id].types.type1}">${PkmnCache[id].types.type1}</span>
   <span class="type type-${PkmnCache[id].types.type2}">${PkmnCache[id].types.type2}</span>
 `;
-
+    // change bar length and hue depending on stat value hopefully
+    let totalStats = 0;
     for (const [key, value] of Object.entries(PkmnCache[id].stats)) {
-        document.getElementById(key + 'stat').textContent = `${value}`;
-    }
+        const statElement = document.getElementById(key + 'stat');
+        statElement.textContent = `${value}`;
 
+        totalStats += Number(value);
+
+        const hue = Math.max(0, Math.min(255, Number(value))) * (240 / 255);
+        statElement.style.background = `hsl(${hue}, 100%, 50%)`;
+        statElement.parentElement.style.gridTemplateColumns = `50px ${40 + (hue / 255) * 85}px`;
+    }
+    // uses combined stat for bst lengt and hue
+    const bstElement = document.getElementById('BSTstat');
+
+    bstElement.textContent = `${totalStats}`;
+
+    const bstHue = (Math.max(175, Math.min(720, totalStats)) - 175) * (240 / 545);
+    bstElement.style.background = `hsl(${bstHue}, 100%, 50%)`;
+    bstElement.parentElement.style.gridTemplateColumns = `50px ${40 + (bstHue / 255) * 85}px`;
+
+    if (!infovisible) {
+        infovisible = true;
+        document.querySelector('#pokemoninfo').classList.add('active');
+    }
 }
 
 async function fetchPokemondetails(id) {
@@ -259,8 +298,6 @@ async function fetchPokemondetails(id) {
             nr: moveNumber,
         };
     });
-
-
 
     // THIS IS REALYL BAD I NEED TO FIX IT 
     // fix it by changin to only load 4 selected mvoes and then run a fetch on move change?
@@ -286,7 +323,7 @@ async function fetchMoveInfo(moveId) {
     }
     // mostly combat used data i think maybe save save when selected but its akward either way
     // commented out untill reimplimentation caused too much load lag for the render probably load detail on move select dropdown
-    /*MoveCache[moveId].meta = {
+    MoveCache[moveId].meta = {
         ailment: data.meta.ailment.name,
         ailment_chance: data.ailment_chance,
         category: data.meta.category.name,
@@ -299,13 +336,10 @@ async function fetchMoveInfo(moveId) {
         min_hits: data.meta.min_hits ?? null,
         min_turns: data.meta.min_turns ?? null,
         stat_chance: data.meta.stat_chance
-    }  */
+    }
     return MoveCache[moveId];
 }
 
-
-
-// DOSENT WORK IF SWAPPED TEAM BUT POKE IS ON OTHER TEAM FIX MAYB
 function changemove(movenr) {
     // find  pokemon currently being shown in active team
     const pokemon = teams[currentTeam].find(pokemon => pokemon.id === SelectedPokemon.pokemonId);
@@ -333,7 +367,7 @@ function changemove(movenr) {
     // make the list fit options up to the maximum set in the css
     dropdown.size = Math.max(1, selectableMoves.length);
 
-    // turn move data into html options for  dropdown
+    // turn move data into html dropdown
     dropdown.innerHTML = selectableMoves
         .map(move =>
             `<option class="moveoption type-${MoveCache[move.nr].type}" value="${move.nr}">${MoveCache[move.nr].name}</option>`
@@ -361,4 +395,23 @@ function changeMoveSelection(movenr, moveId) {
     pokemon.moves[movenr - 1] = newMove;
     closeMoveDropdowns();
     Pokemoninfo(pokemon.id);
+}
+
+
+
+
+
+
+
+function startbattle() {
+    if (teams[0].length > 0 && teams[1].length > 0) {
+        toggleContainer('Pokemon-Container', 'open');
+        toggleContainer('TeamBuilder', 'hide');
+        toggleContainer('battleContainer', 'open');
+        infovisible = false;
+        document.querySelector('#pokemoninfo').classList.remove('active');
+    }
+    // maybe fetch rest of move stats here
+
+
 }

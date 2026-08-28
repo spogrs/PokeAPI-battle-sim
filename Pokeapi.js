@@ -144,15 +144,15 @@ async function Choose(id) {
         if (currentTeamList.length < maxTeamSize) {
             const baseData = PkmnCache[id];
             await fetchPokemondetails(id);
+
             currentTeamList.push({
                 id: id,
                 name: baseData.name,
                 moves: baseData.moves.slice(0, 4)
             });
-            console.log('Selected Pokemon moves:', currentTeamList[currentTeamList.length - 1].moves);
+
             Pokemoninfo(id);
         } else return
-
     renderSelected();
     updateTeamUI();
 }
@@ -168,9 +168,7 @@ function RemovePokemon(teamIndex, id) {
     if (SelectedPokemon.team === teamIndex && SelectedPokemon.pokemonId === id) {
         SelectedPokemon = { team: null, pokemonId: null };
         document.querySelector('#pokemoninfo').setAttribute('visible', '');
-
     }
-
     renderSelected();
     updateTeamUI();
 }
@@ -185,7 +183,6 @@ function renderSelected() {
         const items = teamList.map(pokemonOnTeam => {
             const id = pokemonOnTeam.id;
             const p = PkmnCache[id];
-
             const isSelected = SelectedPokemon.pokemonId === id && SelectedPokemon.team === teamIndex;
 
             return `
@@ -221,7 +218,6 @@ async function Pokemoninfo(id) {
     SelectedPokemon.pokemonId = id;
     SelectedPokemon.team = currentTeam;
 
-    await fetchPokemondetails(id);
     document.getElementById('selectedname').textContent = PkmnCache[id].name;
     document.getElementById('selectedsprite').src = PkmnCache[id].frontSprite;
     const selectedPokemon = teams[currentTeam].find(pokemon => pokemon.id === id);
@@ -289,10 +285,10 @@ async function fetchPokemondetails(id) {
         };
     });
 
-    // THIS IS REALYL BAD I NEED TO FIX IT 
-    // fix it by changin to only load 4 selected mvoes and then run a fetch on move change?
-    // would have to fetch type again though :?
-    await Promise.all(PkmnCache[id].moves.map(move => fetchMoveInfo(move.nr)));
+
+    await Promise.all(PkmnCache[id].moves.slice(0, 4).map(move => fetchMoveInfo(move.nr)));
+
+    Promise.all(PkmnCache[id].moves.slice(4).map(move => fetchMoveInfo(move.nr)));
 }
 
 async function fetchMoveInfo(moveId) {
@@ -313,7 +309,7 @@ async function fetchMoveInfo(moveId) {
     }
     // mostly combat used data i think maybe save save when selected but its akward either way
     // commented out untill reimplimentation caused too much load lag for the render probably load detail on move select dropdown
-    MoveCache[moveId].meta = {
+    /*MoveCache[moveId].meta = {
         ailment: data.meta.ailment.name,
         ailment_chance: data.ailment_chance,
         category: data.meta.category.name,
@@ -326,7 +322,7 @@ async function fetchMoveInfo(moveId) {
         min_hits: data.meta.min_hits ?? null,
         min_turns: data.meta.min_turns ?? null,
         stat_chance: data.meta.stat_chance
-    }
+    }*/
     return MoveCache[moveId];
 }
 

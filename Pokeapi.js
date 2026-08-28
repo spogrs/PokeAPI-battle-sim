@@ -25,7 +25,6 @@ teams[1][4] 1 = tem 2
 
 let currentTeam = 0;
 
-let infovisible = false;
 // if theres a way to find types easier it would save alot of api calls
 // mayb load first 50-60 and then afterwards do the rest?
 async function fetchPokemon(limit) {
@@ -57,7 +56,8 @@ function fetchPokemonData(id) {
                 id: id,
                 name: pokemonData.species.name || pokemonData.name, // prevents sub species from being displayed as the name as they are often too long
                 // redo sprite data maybe for battle but idk
-                sprite: pokemonData.sprites.front_default,
+                frontSprite: pokemonData.sprites.front_default,
+                backSprite: pokemonData.sprites.back_default,
                 types:
                 {
                     type1: pokemonData.types[0].type.name,
@@ -95,7 +95,7 @@ function renderPokemons(Type = '', Region = '') {
             <div class="card" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
                <h3 style="margin: 0;">${pokemon.name}</h3>
                 <small style="margin: 0;">#${pokemon.id}</small>
-                <img src="${pokemon.sprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
+                <img src="${pokemon.frontSprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
                 <div class="type-row">
                  <span class="type type-${pokemon.types.type1}">${pokemon.types.type1}</span>
                     ${pokemon.types.type2 ? `<span class="type type-${pokemon.types.type2}">${pokemon.types.type2}</span>` : ''}
@@ -128,10 +128,7 @@ function switchTeam(index) {
         team1.classList.remove('active');
         team2.classList.add('active');
     }
-    if (infovisible) {
-        infovisible = false;
-        document.querySelector('#pokemoninfo').classList.remove('active');
-    }
+    document.querySelector('#pokemoninfo').setAttribute('visible', '');
 }
 
 // picker for grid gonna probably change this alot in the future
@@ -142,8 +139,7 @@ async function Choose(id) {
 
     if (existingIndex !== -1) {
         currentTeamList.splice(existingIndex, 1);
-        infovisible = false;
-        document.querySelector('#pokemoninfo').classList.remove('active');
+        document.querySelector('#pokemoninfo').setAttribute('visible', '');
     } else
         if (currentTeamList.length < maxTeamSize) {
             const baseData = PkmnCache[id];
@@ -171,10 +167,7 @@ function RemovePokemon(teamIndex, id) {
 
     if (SelectedPokemon.team === teamIndex && SelectedPokemon.pokemonId === id) {
         SelectedPokemon = { team: null, pokemonId: null };
-        if (infovisible) {
-            infovisible = false;
-            document.querySelector('#pokemoninfo').classList.remove('active');
-        }
+        document.querySelector('#pokemoninfo').setAttribute('visible', '');
 
     }
 
@@ -198,7 +191,7 @@ function renderSelected() {
             return `
                  <div class="mini ${isSelected ? 'selected' : ''}" data-id="${id}" 
                      onclick="event.stopPropagation(); currentTeam !== ${teamIndex} && switchTeam(${teamIndex + 1}); SelectedPokemon.pokemonId = ${id}; SelectedPokemon.team = ${teamIndex}; renderSelected(); Pokemoninfo(${id});">
-                    <img src="${p.sprite}" alt="${p.name}" style="width:40px;height:40px;">
+                    <img src="${p.frontSprite}" alt="${p.name}" style="width:40px;height:40px;">
                     <span style="text-transform: capitalize;">${p.name}</span>
                     <button class="mini-remove" type="button" aria-label="Remove ${p.name}"
                         onclick="event.stopPropagation(); RemovePokemon(${teamIndex}, ${id});"><span class="mini-remove-text">x</span></button>
@@ -230,7 +223,7 @@ async function Pokemoninfo(id) {
 
     await fetchPokemondetails(id);
     document.getElementById('selectedname').textContent = PkmnCache[id].name;
-    document.getElementById('selectedsprite').src = PkmnCache[id].sprite;
+    document.getElementById('selectedsprite').src = PkmnCache[id].frontSprite;
     const selectedPokemon = teams[currentTeam].find(pokemon => pokemon.id === id);
     const selectedMoves = selectedPokemon ? selectedPokemon.moves : PkmnCache[id].moves.slice(0, 4);
 
@@ -271,10 +264,7 @@ async function Pokemoninfo(id) {
     bstElement.style.background = `hsl(${bstHue}, 100%, 50%)`;
     bstElement.parentElement.style.gridTemplateColumns = `50px ${40 + (bstHue / 255) * 85}px`;
 
-    if (!infovisible) {
-        infovisible = true;
-        document.querySelector('#pokemoninfo').classList.add('active');
-    }
+    document.querySelector('#pokemoninfo').removeAttribute('visible');
 }
 
 async function fetchPokemondetails(id) {
@@ -406,12 +396,89 @@ function changeMoveSelection(movenr, moveId) {
 function startbattle() {
     if (teams[0].length > 0 && teams[1].length > 0) {
         toggleContainer('Pokemon-Container', 'open');
-        toggleContainer('TeamBuilder', 'hide');
+        document.getElementById('TeamBuilder').hidden = true;
         toggleContainer('battleContainer', 'open');
-        infovisible = false;
-        document.querySelector('#pokemoninfo').classList.remove('active');
+        document.querySelector('#pokemoninfo').setAttribute('visible', '');
     }
+
+
     // maybe fetch rest of move stats here
+    // teams[1][1].id  teams[0][1].id
+
+    // temp make helper later
+    document.querySelector('.spriteBox.opponentSprite img').src = PkmnCache[teams[1][0].id].frontSprite;
+    document.querySelector('.spriteBox.playerSprite img').src = PkmnCache[teams[0][0].id].backSprite;
+
+    document.querySelector('.spriteBox.playerSprite img').src = PkmnCache[teams[0][0].id].backSprite;
+
+}
+
+function attack() {
 
 
 }
+
+function showMoves() {
+    const activePokemon = teams[0][0];
+    const dialogueText = document.getElementById('dialogueText');
+    const mainActions = document.getElementById('mainActions');
+    const moveActions = document.getElementById('moveActions');
+
+    if (!activePokemon) return;
+
+    dialogueText.textContent = 'Choose a move.';
+    mainActions.hidden = true;
+    moveActions.hidden = false;
+
+    activePokemon.moves.forEach((move, index) => {
+        const moveButton = document.getElementById(`battleMove${index + 1}`);
+        const moveData = MoveCache[move.nr];
+        moveButton.textContent = moveData.name;
+        moveButton.className = `btn moveButton type-${moveData.type}`;
+        moveButton.hidden = false;
+    });
+
+    for (let index = activePokemon.moves.length; index < 4; index++) {
+        document.getElementById(`battleMove${index + 1}`).hidden = true;
+    }
+}
+
+function showBattleActions() {
+    const activePokemon = teams[0][0];
+    const dialogueText = document.getElementById('dialogueText');
+    const mainActions = document.getElementById('mainActions');
+    const moveActions = document.getElementById('moveActions');
+
+    dialogueText.textContent = activePokemon
+        ? `What will ${activePokemon.name} do?`
+        : 'Choose an action.';
+    mainActions.hidden = false;
+    moveActions.hidden = true;
+}
+
+function chooseBattleMove(moveIndex) {
+    const move = teams[0][0].moves[moveIndex];
+    const moveData = MoveCache[move.nr];
+
+    // debug msg for now
+    document.getElementById('dialogueText').textContent = `${moveData.name} selected.`;
+}
+
+function showBag() {
+    document.getElementById('dialogueText').textContent = 'Bag pressed';
+}
+
+function showPokemon() {
+    document.getElementById('dialogueText').textContent = 'Choose a Pokémon to switch.';
+    // load list and then use switchPokemon(); to switch probably?
+}
+
+function confirmRun() {
+    document.getElementById('dialogueText').textContent = 'You cannot run from this battle yet.';
+}
+
+function switchPokemon() {
+
+
+}
+

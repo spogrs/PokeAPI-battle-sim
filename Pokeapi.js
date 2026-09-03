@@ -1,8 +1,8 @@
-const PkmnCache = {};
-const MoveCache = {};
+const pkmnCache = {};
+const moveCache = {};
 
 // mayb rename but use for damage relations in the https://pokeapi.co/api/v2/type/1/ api
-const TypeCache = {};
+const typeCache = {};
 
 let SelectedPokemon = {
     team: null,
@@ -11,8 +11,8 @@ let SelectedPokemon = {
 
 
 // i did this at the start reconsider later probably wastefull consts
-const pokegrid = document.querySelector('.pokegrid');
-const details = document.getElementById('details');
+const pokeGrid = document.querySelector('.pokegrid');
+
 
 const maxTeamSize = 6;
 const teams = [[], []];
@@ -52,10 +52,11 @@ function fetchPokemonData(id) {
     return fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
         .then(response => response.json())
         .then(pokemonData => {
-            PkmnCache[id] = {
+            pkmnCache[id] = {
                 id: id,
-                name: pokemonData.species.name || pokemonData.name, // prevents sub species from being displayed as the name as they are often too long
-                // redo sprite data maybe for battle but idk
+
+                // prevents sub species  being displayed as the names are too long
+                name: pokemonData.species.name || pokemonData.name,
                 frontSprite: pokemonData.sprites.front_default,
                 backSprite: pokemonData.sprites.back_default,
                 types:
@@ -81,7 +82,7 @@ function renderPokemons(Type = '', Region = '') {
         galar: [810, 905]
     };
     const selectedRegion = Region || 'none';
-    const visiblePokemon = Object.values(PkmnCache)
+    const visiblePokemon = Object.values(pkmnCache)
         .filter(pokemon => pokemon.id >= RegionRanges[selectedRegion][0] && pokemon.id <= RegionRanges[selectedRegion][1])
         .filter(pokemon => {
             if (!Type) return true;
@@ -91,11 +92,11 @@ function renderPokemons(Type = '', Region = '') {
         })
         .sort((a, b) => a.id - b.id);
 
-    pokegrid.innerHTML = visiblePokemon.map(pokemon => `
+    pokeGrid.innerHTML = visiblePokemon.map(pokemon => `
             <div class="card" data-id="${pokemon.id}" onclick="Choose(${pokemon.id})";>
                <h3 style="margin: 0;">${pokemon.name}</h3>
                 <small style="margin: 0;">#${pokemon.id}</small>
-                <img src="${pokemon.frontSprite}" alt="${pokemon.name}" style="display: block; margin: 0;">
+                <img src="${pokemon.frontSprite}" alt="${pokemon.name}" style="display: block; margin: 0;width: 142px; height: 142px;">
                 <div class="type-row">
                  <span class="type type-${pokemon.types.type1}">${pokemon.types.type1}</span>
                     ${pokemon.types.type2 ? `<span class="type type-${pokemon.types.type2}">${pokemon.types.type2}</span>` : ''}
@@ -142,13 +143,17 @@ async function Choose(id) {
         document.querySelector('#pokemoninfo').setAttribute('visible', '');
     } else
         if (currentTeamList.length < maxTeamSize) {
-            const baseData = PkmnCache[id];
+            const baseData = pkmnCache[id];
             await fetchPokemondetails(id);
 
             currentTeamList.push({
                 id: id,
                 name: baseData.name,
-                moves: baseData.moves.slice(0, 4)
+                moves: baseData.moves.slice(0, 4),
+                frontSprite: baseData.frontSprite,
+                backSprite: baseData.backSprite,
+                maxHP: null,
+                curHP: null
             });
 
             Pokemoninfo(id);
@@ -182,7 +187,7 @@ function renderSelected() {
 
         const items = teamList.map(pokemonOnTeam => {
             const id = pokemonOnTeam.id;
-            const p = PkmnCache[id];
+            const p = pkmnCache[id];
             const isSelected = SelectedPokemon.pokemonId === id && SelectedPokemon.team === teamIndex;
 
             return `
@@ -218,10 +223,10 @@ async function Pokemoninfo(id) {
     SelectedPokemon.pokemonId = id;
     SelectedPokemon.team = currentTeam;
 
-    document.getElementById('selectedname').textContent = PkmnCache[id].name;
-    document.getElementById('selectedsprite').src = PkmnCache[id].frontSprite;
+    document.getElementById('selectedname').textContent = pkmnCache[id].name;
+    document.getElementById('selectedsprite').src = pkmnCache[id].frontSprite;
     const selectedPokemon = teams[currentTeam].find(pokemon => pokemon.id === id);
-    const selectedMoves = selectedPokemon ? selectedPokemon.moves : PkmnCache[id].moves.slice(0, 4);
+    const selectedMoves = selectedPokemon ? selectedPokemon.moves : pkmnCache[id].moves.slice(0, 4);
 
     // make changeable via method prolly we'll see
     // porbably also use a loop but unsure 
@@ -229,19 +234,19 @@ async function Pokemoninfo(id) {
 
     selectedMoves.forEach((move, index) => {
         const moveElement = document.getElementById(`Move${index + 1}`);
-        const moveData = MoveCache[move.nr];
+        const moveData = moveCache[move.nr];
 
         moveElement.textContent = moveData.name;
         moveElement.className = `move type-${moveData.type}`;
     });
 
     selectedTypeRow.innerHTML = `
-  <span class="type type-${PkmnCache[id].types.type1}">${PkmnCache[id].types.type1}</span>
-  <span class="type type-${PkmnCache[id].types.type2}">${PkmnCache[id].types.type2}</span>
+  <span class="type type-${pkmnCache[id].types.type1}">${pkmnCache[id].types.type1}</span>
+  <span class="type type-${pkmnCache[id].types.type2}">${pkmnCache[id].types.type2}</span>
 `;
     // change bar length and hue depending on stat value hopefully
     let totalStats = 0;
-    for (const [key, value] of Object.entries(PkmnCache[id].stats)) {
+    for (const [key, value] of Object.entries(pkmnCache[id].stats)) {
         const statElement = document.getElementById(key + 'stat');
         statElement.textContent = `${value}`;
 
@@ -264,12 +269,12 @@ async function Pokemoninfo(id) {
 }
 
 async function fetchPokemondetails(id) {
-    if (PkmnCache[id].stats) return PkmnCache[id];
+    if (pkmnCache[id].stats) return pkmnCache[id];
 
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
     const data = await response.json();
 
-    PkmnCache[id].stats = {
+    pkmnCache[id].stats = {
         HP: data.stats[0].base_stat,
         ATK: data.stats[1].base_stat,
         DEF: data.stats[2].base_stat,
@@ -277,7 +282,7 @@ async function fetchPokemondetails(id) {
         SpDEF: data.stats[4].base_stat,
         SPD: data.stats[5].base_stat
     };
-    PkmnCache[id].moves = data.moves.map(m => {
+    pkmnCache[id].moves = data.moves.map(m => {
         const urlParts = m.move.url.split('/');
         const moveNumber = urlParts[urlParts.length - 2];
         return {
@@ -286,19 +291,19 @@ async function fetchPokemondetails(id) {
     });
 
 
-    await Promise.all(PkmnCache[id].moves.slice(0, 4).map(move => fetchMoveInfo(move.nr)));
+    await Promise.all(pkmnCache[id].moves.slice(0, 4).map(move => fetchMoveInfo(move.nr)));
 
-    Promise.all(PkmnCache[id].moves.slice(4).map(move => fetchMoveInfo(move.nr)));
+    Promise.all(pkmnCache[id].moves.slice(4).map(move => fetchMoveInfo(move.nr)));
 }
 
 async function fetchMoveInfo(moveId) {
-    if (MoveCache[moveId]) return MoveCache[moveId];
+    if (moveCache[moveId]) return moveCache[moveId];
     const response = await fetch(`https://pokeapi.co/api/v2/move/${moveId}`);
     const data = await response.json();
 
     // change data structure at some point specifically the ailment stuff i think
     // store more data in the sub folders still but this is good start
-    MoveCache[moveId] = {
+    moveCache[moveId] = {
         name: data.name,
         power: data.power,
         pp: data.pp,
@@ -323,7 +328,7 @@ async function fetchMoveInfo(moveId) {
         min_turns: data.meta.min_turns ?? null,
         stat_chance: data.meta.stat_chance
     }*/
-    return MoveCache[moveId];
+    return moveCache[moveId];
 }
 
 function changemove(movenr) {
@@ -331,11 +336,10 @@ function changemove(movenr) {
     const pokemon = teams[currentTeam].find(pokemon => pokemon.id === SelectedPokemon.pokemonId);
     if (!pokemon) return;
 
-    // close another dropdown first so only one can be open at a time
     closeMoveDropdowns();
 
     // get evry move this pokemon can use from cache
-    const availableMoves = PkmnCache[pokemon.id].moves;
+    const availableMoves = pkmnCache[pokemon.id].moves;
 
     // keep already selected moves out so the pokemon cannot have duplicates
     const selectedMoveIds = pokemon.moves.map(move => move.nr);
@@ -356,7 +360,7 @@ function changemove(movenr) {
     // turn move data into html dropdown
     dropdown.innerHTML = selectableMoves
         .map(move =>
-            `<option class="moveoption type-${MoveCache[move.nr].type}" value="${move.nr}">${MoveCache[move.nr].name}</option>`
+            `<option class="moveoption type-${moveCache[move.nr].type}" value="${move.nr}">${moveCache[move.nr].name}</option>`
         ).join('');
 
     // show dropdown and focus it
@@ -375,7 +379,7 @@ function changeMoveSelection(movenr, moveId) {
     const pokemon = teams[currentTeam].find(pokemon => pokemon.id === SelectedPokemon.pokemonId);
     if (!pokemon) return;
 
-    const newMove = PkmnCache[pokemon.id].moves.find(move => move.nr === moveId);
+    const newMove = pkmnCache[pokemon.id].moves.find(move => move.nr === moveId);
     if (!newMove) return;
 
     pokemon.moves[movenr - 1] = newMove;
@@ -389,36 +393,99 @@ function changeMoveSelection(movenr, moveId) {
 
 
 
+
+
+
+// teams[1][1].id  teams[0][1].id
+const battleState = {
+    playerPokemon: null,
+    opponentPokemon: null
+};
+
 function startbattle() {
-    if (teams[0].length > 0 && teams[1].length > 0) {
-        toggleContainer('Pokemon-Container', 'open');
-        document.getElementById('TeamBuilder').hidden = true;
-        toggleContainer('battleContainer', 'open');
-        document.querySelector('#pokemoninfo').setAttribute('visible', '');
+
+    if (teams[0].length === 0 || teams[1].length === 0) return;
+    // make selectable pre battle
+    const LVL = 50;
+
+    //  HP to pokemon in both teams
+    for (const team of teams) {
+        for (const pokemon of team) {
+            pokemon.maxHP = Math.floor(
+                (2 * pkmnCache[pokemon.id].stats.HP) * LVL / 100
+            ) + LVL + 10;
+            pokemon.curHP = pokemon.maxHP;
+        }
     }
 
+    // switch menu inital load info
+    for (let i = 0; i < teams[0].length; i++) {
+        document.getElementById(`pkmn${i}`).hidden = false;
+        document.getElementById(`pkmn${i}`).querySelector(`.name`).textContent = teams[0][i].name;
+        document.getElementById(`pkmn${i}`).querySelector(`img`).src = teams[0][i].frontSprite;
+    }
 
-    // maybe fetch rest of move stats here
-    // teams[1][1].id  teams[0][1].id
+    // maybe change to let you select
+    battleState.playerPokemon = teams[0][0];
+    document.querySelector('.spriteBox.playerSprite img').src =
+        battleState.playerPokemon.backSprite;
+    document.querySelector('.playerStatus .name').textContent =
+        battleState.playerPokemon.name;
+    autoSwitchOpponent();
 
-    // temp make helper later
-    document.querySelector('.spriteBox.opponentSprite img').src = PkmnCache[teams[1][0].id].frontSprite;
-    document.querySelector('.spriteBox.playerSprite img').src = PkmnCache[teams[0][0].id].backSprite;
+    // enables combat ui
+    toggleContainer('Pokemon-Container', 'open');
+    document.getElementById('TeamBuilder').hidden = true;
+    toggleContainer('battleContainer', 'open');
+    document.querySelector('#pokemoninfo').setAttribute('visible', '');
+    // keep here since all the pokemon lvls are gonna be the same focantr rulesets sake
+    document.querySelector('.playerStatus .level').textContent = 'Lv' + LVL;
+    document.querySelector('.opponentStatus .level').textContent = 'Lv' + LVL;
 
-    document.querySelector('.spriteBox.playerSprite img').src = PkmnCache[teams[0][0].id].backSprite;
+    // temp make helper later or part of switch
 
+
+
+    updateCombatUi();
+}
+dialogueText.textContent = activePokemon
+function updateCombatUi() {
+    const oPkmn = battleState.opponentPokemon;
+    const pPkmn = battleState.playerPokemon;
+
+
+    const oHpPct = (oPkmn.curHP / oPkmn.maxHP) * 100;
+    const oHpFill = document.querySelector('.opponentStatus .hpFill');
+
+    document.querySelector('.opponentStatus .hpText').textContent = oPkmn.curHP + '/' + oPkmn.maxHP;
+    oHpFill.style.width = oHpPct + '%';
+    oHpFill.style.background = getHpCol(oHpPct);
+
+    const pHpPct = (pPkmn.curHP / pPkmn.maxHP) * 100;
+    const pHpFill = document.querySelector('.playerStatus .hpFill');
+
+    document.querySelector('.playerStatus .hpText').textContent = pPkmn.curHP + '/' + pPkmn.maxHP;
+    pHpFill.style.width = pHpPct + '%';
+    pHpFill.style.background = getHpCol(pHpPct);
 }
 
-function attack() {
-
-
+// helepr for hp col
+function getHpCol(percentage) {
+    if (percentage > 50) return 'greenyellow';
+    if (percentage > 20) return 'yellow';
+    return 'red';
 }
+
 
 function showMoves() {
     const activePokemon = teams[0][0];
     const dialogueText = document.getElementById('dialogueText');
     const mainActions = document.getElementById('mainActions');
     const moveActions = document.getElementById('moveActions');
+
+
+    // debug hp reducer for now
+    battleState.opponentPokemon.curHP = Math.max(0, battleState.opponentPokemon.curHP - 20);
 
     if (!activePokemon) return;
 
@@ -428,7 +495,7 @@ function showMoves() {
 
     activePokemon.moves.forEach((move, index) => {
         const moveButton = document.getElementById(`battleMove${index + 1}`);
-        const moveData = MoveCache[move.nr];
+        const moveData = moveCache[move.nr];
         moveButton.textContent = moveData.name;
         moveButton.className = `btn moveButton type-${moveData.type}`;
         moveButton.hidden = false;
@@ -437,6 +504,7 @@ function showMoves() {
     for (let index = activePokemon.moves.length; index < 4; index++) {
         document.getElementById(`battleMove${index + 1}`).hidden = true;
     }
+    updateCombatUi();
 }
 
 function showBattleActions() {
@@ -444,37 +512,101 @@ function showBattleActions() {
     const dialogueText = document.getElementById('dialogueText');
     const mainActions = document.getElementById('mainActions');
     const moveActions = document.getElementById('moveActions');
+    const swapPokemon = document.getElementById('swapPokemon');
 
     dialogueText.textContent = activePokemon
-        ? `What will ${activePokemon.name} do?`
-        : 'Choose an action.';
+        ? `What will ${activePokemon.name} do?` : 'Choose an action.';
+
+    // move to end turn maybe
     mainActions.hidden = false;
     moveActions.hidden = true;
+    swapPokemon.hidden = true;
+    dialogueText.hidden = false;
 }
 
 function chooseBattleMove(moveIndex) {
     const move = teams[0][0].moves[moveIndex];
-    const moveData = MoveCache[move.nr];
+    const moveData = moveCache[move.nr];
 
     // debug msg for now
     document.getElementById('dialogueText').textContent = `${moveData.name} selected.`;
 }
 
 function showBag() {
-    document.getElementById('dialogueText').textContent = 'Bag pressed';
+    document.getElementById('dialogueText').textContent = 'Bag';
 }
 
 function showPokemon() {
-    document.getElementById('dialogueText').textContent = 'Choose a Pokémon to switch.';
+    const dialogueText = document.getElementById('dialogueText');
+    const mainActions = document.getElementById('mainActions');
+    const swapPokemon = document.getElementById('swapPokemon');
+
+    // maybe make a end turn func actually ye
+    dialogueText.hidden = true;
+    mainActions.hidden = true;
+    swapPokemon.hidden = false;
+    for (let i = 0; i < teams[0].length; i++) {
+        const pokemon = teams[0][i];
+        const hpPct = Math.max(0, Math.min(100, (pokemon.curHP / pokemon.maxHP) * 100));
+        const hpFill = document.getElementById(`pkmn${i}`).querySelector('.switchHpFill');
+        hpFill.style.width = hpPct + '%';
+        hpFill.style.background = getHpCol(hpPct);
+    }
+
     // load list and then use switchPokemon(); to switch probably?
 }
 
+
+
+function switchPokemon(switchTarget) {
+    const nextPokemon = teams[0][switchTarget];
+    if (!nextPokemon || nextPokemon === battleState.playerPokemon) return;
+
+    const dialogueText = document.getElementById('dialogueText');
+    const swapPokemon = document.getElementById('swapPokemon');
+
+    const prevPokemon = battleState.playerPokemon;
+    battleState.playerPokemon = nextPokemon;
+
+    if (prevPokemon.curHP > 0) {
+        swapPokemon.hidden = true;
+        dialogueText.hidden = false;
+        dialogueText.textContent = 'Come back, ' + prevPokemon.name + '!';
+        setTimeout(() => {
+            document.querySelector('.spriteBox.playerSprite img').src =
+                nextPokemon.backSprite;
+            dialogueText.textContent = 'Go! ' + nextPokemon.name + '!';
+            document.querySelector('.playerStatus .name').textContent = nextPokemon.name;
+        }, 1000);
+        setTimeout(turnEnd, 3000);
+    }
+}
+
+function autoSwitchOpponent() {
+    const nextPokemon = teams[1].find(pokemon => pokemon.curHP > 0);
+    if (!nextPokemon) {
+        // put whatever i do for victory here probably clear data and return after button
+        // or move it into the turn resolve?
+        document.getElementById('dialogueText').textContent = 'You won the battle!';
+        return;
+    }
+
+    battleState.opponentPokemon = nextPokemon;
+
+    document.querySelector('.opponentStatus .name').textContent = battleState.opponentPokemon.name;
+    document.querySelector('.spriteBox.opponentSprite img').src = pkmnCache[battleState.opponentPokemon.id].frontSprite;
+
+    updateCombatUi();
+}
+
 function confirmRun() {
-    document.getElementById('dialogueText').textContent = 'You cannot run from this battle yet.';
+    document.getElementById('dialogueText').textContent = 'You cannot run from a trainer battle!';
 }
 
-function switchPokemon() {
+function turnEnd() {
+
+
+    showBattleActions();
 
 
 }
-

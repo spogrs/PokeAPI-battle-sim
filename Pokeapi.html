@@ -127,121 +127,127 @@
             </section>
 
             <button onclick="startbattle()" id="startbutton">Start Battle</button>
-
-
-
         </section>
-        <section id="battleContainer">
+        <footer id="sidefooter">
+            <a href="https://github.com/spogrs/PokeAPI-battle-sim">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="white" display="inline-block" overflow="visible"
+                    style="vertical-align:text-bottom">
+                    <path
+                        d="M10.226 17.284c-2.965-.36-5.054-2.493-5.054-5.256 0-1.123.404-2.336 1.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112 2.111.36 2.83 1.01.853-.269 1.752-.404 2.853-.404 1.1 0 1.999.135 2.807.382.696-.629 1.932-1.1 2.83-.988.315.606.36 2.179.067 2.942.72.854 1.101 2 1.101 3.167 0 2.763-2.089 4.852-5.098 5.234.763.494 1.28 1.572 1.28 2.807v2.336c0 .674.561 1.056 1.235.786 4.066-1.55 7.255-5.615 7.255-10.646C23.5 6.188 18.334 1 11.978 1 5.62 1 .5 6.188.5 12.545c0 4.986 3.167 9.12 7.435 10.669.606.225 1.19-.18 1.19-.786V20.63a2.9 2.9 0 0 1-1.078.224c-1.483 0-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27 0-.27.45-.471.898-.471.652 0 1.213.404 1.797 1.235.45.651.921.943 1.483.943.561 0 .92-.202 1.437-.719.382-.381.674-.718.944-.943">
+                    </path>
+                </svg>
+                <span style="font-weight: bold; color: white;">GitHub</span>
+            </a>
+            <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
+            <button onclick="Choose(Math.floor(Math.random() * 1000) + 1);">Debug Add random</button>
+        </footer>
 
-            <div id="battleScreen">
-                <div class="statusBox opponentStatus">
-                    <div class="info">
-                        <span class="name">placeholdername</span>
-                        <span class="level">placeholderlvl</span>
-                    </div>
-                    <div class="hpBar">
-                        <div class="hpFill"></div>
-                    </div>
-                    <div class="hpText">0/404</div>
+
+    </div>
+
+    <section id="battleContainer">
+
+        <div id="battleScreen">
+            <div class="statusBox opponentStatus">
+                <div class="info">
+                    <span class="name">placeholdername</span>
+                    <span class="level">placeholderlvl</span>
                 </div>
-
-                <div class="spriteBox opponentSprite">
-                    <img src="">
+                <div class="hpBar">
+                    <div class="hpFill"></div>
                 </div>
+                <div class="hpText">0/404</div>
+            </div>
 
-                <div class="spriteBox playerSprite">
-                    <img src="">
+            <div class="spriteBox opponentSprite">
+                <img src="">
+            </div>
+
+            <div class="spriteBox playerSprite">
+                <img src="">
+            </div>
+
+            <div class="statusBox playerStatus">
+                <div class="info">
+                    <span class="name">placeholdername</span>
+                    <span class="level">placeholderlvl</span>
                 </div>
-
-                <div class="statusBox playerStatus">
-                    <div class="info">
-                        <span class="name">placeholdername</span>
-                        <span class="level">placeholderlvl</span>
-                    </div>
-                    <div class="hpBar">
-                        <div class="hpFill"></div>
-                    </div>
-                    <div class="hpText">0/404</div>
+                <div class="hpBar">
+                    <div class="hpFill"></div>
                 </div>
+                <div class="hpText">0/404</div>
+            </div>
 
-                <div class="battleMenu">
-                    <div class="dialogueText" id="dialogueText">What will your Pokémon do?</div>
-                    <div class="actionGrid" id="actionGrid">
-                        <section class="actionView mainActions" id="mainActions">
-                            <button class="btn btnFight" type="button" onclick="showMoves()">FIGHT</button>
-                            <button class="btn btnBag" type="button" onclick="showBag()">BAG</button>
-                            <button class="btn btnPkmn" type="button" onclick="showPokemon()">POKEMON</button>
-                            <button class="btn btnRun" type="button" onclick="confirmRun()">RUN</button>
-                        </section>
+            <div class="battleMenu">
 
-                        <section class="actionView moveActions" id="moveActions" hidden>
-                            <button class="btn moveButton" id="battleMove1" type="button"
-                                onclick="chooseBattleMove(0)"></button>
-                            <button class="btn moveButton" id="battleMove2" type="button"
-                                onclick="chooseBattleMove(1)"></button>
-                            <button class="btn moveButton" id="battleMove3" type="button"
-                                onclick="chooseBattleMove(2)"></button>
-                            <button class="btn moveButton" id="battleMove4" type="button"
-                                onclick="chooseBattleMove(3)"></button>
-                            <button class="btn backButton" type="button" onclick="showBattleActions()">BACK</button>
-                        </section>
+                <section class="actionView" id="swapPokemon" hidden>
+                    <button class="btn" id="pkmn0" hidden type="button" onclick="switchPokemon(0)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn" id="pkmn1" hidden type="button" onclick="switchPokemon(1)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn" id="pkmn2" hidden type="button" onclick="switchPokemon(2)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn" id="pkmn3" hidden type="button" onclick="switchPokemon(3)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn" id="pkmn4" hidden type="button" onclick="switchPokemon(4)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn" id="pkmn5" hidden type="button" onclick="switchPokemon(5)"><img src=""><span
+                            class="name"></span><span class="switchHpBar"><span
+                                class="switchHpFill"></span></span></button>
+                    <button class="btn backButton" type="button" onclick="showBattleActions()">BACK</button>
+                </section>
 
-                        <section class="actionView swapActions" id="moveActions" hidden>
-                            <button class="btn moveButton" id="battleMove1" type="button"
-                                onclick="chooseBattleMove(0)"></button>
-                            <button class="btn moveButton" id="battleMove2" type="button"
-                                onclick="chooseBattleMove(1)"></button>
-                            <button class="btn moveButton" id="battleMove3" type="button"
-                                onclick="chooseBattleMove(2)"></button>
-                            <button class="btn moveButton" id="battleMove4" type="button"
-                                onclick="chooseBattleMove(3)"></button>
-                            <button class="btn backButton" type="button" onclick="showBattleActions()">BACK</button>
-                        </section>
+                <div class="dialogueText" id="dialogueText">What will your Pokémon do?</div>
+                <div class="actionGrid" id="actionGrid">
+                    <section class="actionView" id="mainActions">
+                        <button class="btn btnFight" type="button" onclick="showMoves()">FIGHT</button>
+                        <button class="btn btnBag" type="button" onclick="showBag()">BAG</button>
+                        <button class="btn btnPkmn" type="button" onclick="showPokemon()">POKEMON</button>
+                        <button class="btn btnRun" type="button" onclick="confirmRun()">RUN</button>
+                    </section>
 
-                    </div>
+                    <section class="actionView" id="moveActions" hidden>
+                        <button class="btn moveButton" id="battleMove1" type="button"
+                            onclick="chooseBattleMove(0)">BLAH</button>
+                        <button class="btn moveButton" id="battleMove2" type="button"
+                            onclick="chooseBattleMove(1)"></button>
+                        <button class="btn moveButton" id="battleMove3" type="button"
+                            onclick="chooseBattleMove(2)"></button>
+                        <button class="btn moveButton" id="battleMove4" type="button"
+                            onclick="chooseBattleMove(3)"></button>
+                        <button class="btn backButton" type="button" onclick="showBattleActions()">BACK</button>
+                    </section>
+
+                    <!-- add dead class to turn red ref for later 
+                     
+                    make hidden on buttons work better dont list when not filled? -->
+
                 </div>
-
-
-
-
             </div>
 
 
 
-    </div>
 
-
-    </section>
-
-    <footer id="sidefooter">
-        <a href="https://github.com/spogrs/PokeAPI-battle-sim">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="white" display="inline-block" overflow="visible"
-                style="vertical-align:text-bottom">
-                <path
-                    d="M10.226 17.284c-2.965-.36-5.054-2.493-5.054-5.256 0-1.123.404-2.336 1.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112 2.111.36 2.83 1.01.853-.269 1.752-.404 2.853-.404 1.1 0 1.999.135 2.807.382.696-.629 1.932-1.1 2.83-.988.315.606.36 2.179.067 2.942.72.854 1.101 2 1.101 3.167 0 2.763-2.089 4.852-5.098 5.234.763.494 1.28 1.572 1.28 2.807v2.336c0 .674.561 1.056 1.235.786 4.066-1.55 7.255-5.615 7.255-10.646C23.5 6.188 18.334 1 11.978 1 5.62 1 .5 6.188.5 12.545c0 4.986 3.167 9.12 7.435 10.669.606.225 1.19-.18 1.19-.786V20.63a2.9 2.9 0 0 1-1.078.224c-1.483 0-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27 0-.27.45-.471.898-.471.652 0 1.213.404 1.797 1.235.45.651.921.943 1.483.943.561 0 .92-.202 1.437-.719.382-.381.674-.718.944-.943">
-                </path>
-            </svg>
-            <span style="font-weight: bold; color: white;">GitHub</span>
-        </a>
-        <!-- DEBUG BUTTONS TEMPORARY <button onclick="fetchPokemon()">Fetch Pokemon</button> -->
-        <button onclick="toggleContainer('Pokemon-Container', 'open');">pick popout
-            temp</button>
-        <button onclick="Choose(Math.floor(Math.random() * 1000) + 1);">Debug Add random</button>
-    </footer>
-
-
-    </div>
-
-
-    <!-- Pokemon grid container and cards-->
-    <main>
-        <div id="Pokemon-Container" class="open">
-            <div class="pokegrid"></div>
         </div>
-    </main>
 
 
 
+
+
+        </div>
+
+
+        <!-- Pokemon grid container and cards-->
+        <main>
+            <div id="Pokemon-Container" class="open">
+                <div class="pokegrid"></div>
+            </div>
+        </main>
 
 
 

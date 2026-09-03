@@ -16,12 +16,13 @@ header {
 }
 
 #sidefooter {
-    position: fixed;
     bottom: 0px;
     height: 50px;
+    width: 100%;
     background-color: rgba(0, 0, 0, 0.500);
-    width: inherit;
     align-content: center;
+    position: absolute;
+
 }
 
 #teams {
@@ -493,6 +494,87 @@ header {
     gap: 10px;
 }
 
+#swapPokemon {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2) 1fr;
+    gap: 4px;
+    height: 108px;
+    align-content: stretch;
+}
+
+#swapPokemon img {
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+
+#swapPokemon .name {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    text-overflow: ellipsis;
+    font-size: medium;
+}
+
+.switchHpBar {
+    position: absolute;
+    margin-top: 25px;
+    margin-left: 35px;
+    width: 125px;
+    height: 6px;
+    background: #555;
+    border: 1px solid #222;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.switchHpFill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: greenyellow;
+}
+
+#swapPokemon .btn:not(.backButton) {
+    font-size: 11px;
+    padding: 2px 4px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    background: rgb(6, 214, 160);
+    color: white;
+    text-shadow: 1px 1px 0px black;
+    border: 2px solid rgb(4, 184, 137);
+}
+
+#swapPokemon .btn:not(.backButton).dead {
+    background: crimson;
+    border: 2px solid maroon;
+}
+
+#swapPokemon .btn:not(.backButton).dead:hover {
+    background: rgb(190, 10, 60);
+    border: 2px solid rgb(98, 0, 0);
+    cursor: default;
+}
+
+#swapPokemon .btn:not(.btn:not(.backButton).dead):hover {
+    background: rgb(4, 184, 137);
+    border-color: rgb(3, 143, 107);
+}
+
+
+#swapPokemon .backButton {
+    grid-column: 1 / span 3;
+    height: 28px;
+    font-size: 14px;
+    padding: 0;
+    align-self: end;
+}
 
 .statusBox {
     background: beige;
@@ -508,6 +590,10 @@ header {
     justify-content: space-between;
     font-weight: bold;
     margin-bottom: 5px;
+}
+
+.name {
+    text-transform: capitalize;
 }
 
 .hpBar {

@@ -310,11 +310,11 @@ async function fetchMoveInfo(moveId) {
         priority: data.priority,
         stat_changes: data.stat_changes,
         target: data.target.name,
-        type: data.type.name
-    }
-    // mostly combat used data i think maybe save save when selected but its akward either way
-    // commented out untill reimplimentation caused too much load lag for the render probably load detail on move select dropdown
-    /*MoveCache[moveId].meta = {
+        type: data.type.name,
+
+        // mostly combat used data i think maybe save save when selected but its akward either way
+        // commented out untill reimplimentation caused too much load lag for the render probably load detail on move select dropdown
+
         ailment: data.meta.ailment.name,
         ailment_chance: data.ailment_chance,
         category: data.meta.category.name,
@@ -327,7 +327,7 @@ async function fetchMoveInfo(moveId) {
         min_hits: data.meta.min_hits ?? null,
         min_turns: data.meta.min_turns ?? null,
         stat_chance: data.meta.stat_chance
-    }*/
+    }
     return moveCache[moveId];
 }
 
@@ -396,10 +396,15 @@ function changeMoveSelection(movenr, moveId) {
 
 
 
+
 // teams[1][1].id  teams[0][1].id
 const battleState = {
     playerPokemon: null,
-    opponentPokemon: null
+    opponentPokemon: null,
+    currentTurn: {
+        actions: [], // { teamIndex, type, index }
+        queue: []    // 
+    }
 };
 
 function startbattle() {
@@ -431,6 +436,7 @@ function startbattle() {
         battleState.playerPokemon.backSprite;
     document.querySelector('.playerStatus .name').textContent =
         battleState.playerPokemon.name;
+    loadMoveSlots();
     autoSwitchOpponent();
 
     // enables combat ui
@@ -438,21 +444,17 @@ function startbattle() {
     document.getElementById('TeamBuilder').hidden = true;
     toggleContainer('battleContainer', 'open');
     document.querySelector('#pokemoninfo').setAttribute('visible', '');
-    // keep here since all the pokemon lvls are gonna be the same focantr rulesets sake
+
+    // keep here since all the pokemon lvls are gonna be the same focantr rulesets sake probably
     document.querySelector('.playerStatus .level').textContent = 'Lv' + LVL;
     document.querySelector('.opponentStatus .level').textContent = 'Lv' + LVL;
-
-    // temp make helper later or part of switch
-
 
 
     updateCombatUi();
 }
-dialogueText.textContent = activePokemon
 function updateCombatUi() {
     const oPkmn = battleState.opponentPokemon;
     const pPkmn = battleState.playerPokemon;
-
 
     const oHpPct = (oPkmn.curHP / oPkmn.maxHP) * 100;
     const oHpFill = document.querySelector('.opponentStatus .hpFill');
@@ -469,6 +471,7 @@ function updateCombatUi() {
     pHpFill.style.background = getHpCol(pHpPct);
 }
 
+
 // helepr for hp col
 function getHpCol(percentage) {
     if (percentage > 50) return 'greenyellow';
@@ -476,46 +479,43 @@ function getHpCol(percentage) {
     return 'red';
 }
 
-
-function showMoves() {
-    const activePokemon = teams[0][0];
-    const dialogueText = document.getElementById('dialogueText');
-    const mainActions = document.getElementById('mainActions');
-    const moveActions = document.getElementById('moveActions');
-
-
-    // debug hp reducer for now
-    battleState.opponentPokemon.curHP = Math.max(0, battleState.opponentPokemon.curHP - 20);
-
-    if (!activePokemon) return;
-
-    dialogueText.textContent = 'Choose a move.';
-    mainActions.hidden = true;
-    moveActions.hidden = false;
-
-    activePokemon.moves.forEach((move, index) => {
+// helper to not call constantly only on swap or load
+function loadMoveSlots() {
+    battleState.playerPokemon.moves.forEach((move, index) => {
         const moveButton = document.getElementById(`battleMove${index + 1}`);
         const moveData = moveCache[move.nr];
         moveButton.textContent = moveData.name;
         moveButton.className = `btn moveButton type-${moveData.type}`;
         moveButton.hidden = false;
     });
-
-    for (let index = activePokemon.moves.length; index < 4; index++) {
+    for (let index = battleState.playerPokemon.moves.length; index < 4; index++) {
         document.getElementById(`battleMove${index + 1}`).hidden = true;
     }
+}
+
+
+function showMoves() {
+    const activePokemon = battleState.playerPokemon;
+    const dialogueText = document.getElementById('dialogueText');
+    const mainActions = document.getElementById('mainActions');
+    const moveActions = document.getElementById('moveActions');
+
+    if (!activePokemon) return;
+
+    dialogueText.textContent = 'Choose a move.';
+    mainActions.hidden = true;
+    moveActions.hidden = false;
     updateCombatUi();
 }
 
 function showBattleActions() {
-    const activePokemon = teams[0][0];
+    const activePokemon = battleState.playerPokemon;
     const dialogueText = document.getElementById('dialogueText');
     const mainActions = document.getElementById('mainActions');
     const moveActions = document.getElementById('moveActions');
     const swapPokemon = document.getElementById('swapPokemon');
 
-    dialogueText.textContent = activePokemon
-        ? `What will ${activePokemon.name} do?` : 'Choose an action.';
+    dialogueText.textContent = `What will ${activePokemon.name} do?`;
 
     // move to end turn maybe
     mainActions.hidden = false;
@@ -525,23 +525,60 @@ function showBattleActions() {
 }
 
 function chooseBattleMove(moveIndex) {
-    const move = teams[0][0].moves[moveIndex];
-    const moveData = moveCache[move.nr];
+    // save in action q
+    battleState.currentTurn.actions.push({
+        teamIndex: 0, // 0 = player
+        type: 'MOVE',
+        index: moveIndex // moveslot
+    });
 
-    // debug msg for now
-    document.getElementById('dialogueText').textContent = `${moveData.name} selected.`;
+    // 
+    document.getElementById('mainActions').hidden = true;
+    document.getElementById('moveActions').hidden = true;
+    document.getElementById('dialogueText').hidden = false;
+
+    // enemy ai
+    processOpponentAI();
 }
+
+function processOpponentAI() {
+    // randoms 1-4 
+    const chosenMoveIndex = Math.floor(Math.random() * 4);;
+
+    // add enemy choice to q
+    battleState.currentTurn.actions.push({
+        teamIndex: 1,      // 1 = opp
+        type: 'MOVE',
+        index: chosenMoveIndex // moveslot
+    });
+
+    // calc turnorder
+    turnOrder();
+}
+
+
+/* move catagorys
+0 name "damage"         1 name "ailment"                2 name "net-good-stats"
+3 name "heal"           4 name"damage-ailment"          5 name"swagger"
+6 name"damage-lower"    7 name "damage-raise"           8 name "damage-heal"
+9 name "ohko"           10 name "whole-field-effect"    11 name "field-effect"
+12 name "force-switch"  13 name "unique"
+*/
+
+// 1 = status 2 = physical 3 = special // move damage class
+
+
 
 function showBag() {
     document.getElementById('dialogueText').textContent = 'Bag';
 }
 
 function showPokemon() {
+    // probably make fainting disable the back button on here
     const dialogueText = document.getElementById('dialogueText');
     const mainActions = document.getElementById('mainActions');
     const swapPokemon = document.getElementById('swapPokemon');
 
-    // maybe make a end turn func actually ye
     dialogueText.hidden = true;
     mainActions.hidden = true;
     swapPokemon.hidden = false;
@@ -552,41 +589,69 @@ function showPokemon() {
         hpFill.style.width = hpPct + '%';
         hpFill.style.background = getHpCol(hpPct);
     }
-
-    // load list and then use switchPokemon(); to switch probably?
 }
-
-
 
 function switchPokemon(switchTarget) {
     const nextPokemon = teams[0][switchTarget];
-    if (!nextPokemon || nextPokemon === battleState.playerPokemon) return;
+    if (!nextPokemon || nextPokemon == battleState.playerPokemon || nextPokemon.curHP == 0) return;
+
+
+
+    if (battleState.playerPokemon.curHP > 0 && battleState.currentTurn.queue.length === 0) {
+        battleState.currentTurn.actions.push({
+            teamIndex: 0,
+            type: 'SWITCH',
+            index: switchTarget
+        });
+
+        document.getElementById('swapPokemon').hidden = true;
+        document.getElementById('dialogueText').hidden = false;
+
+        // 
+        processOpponentAI();
+        return;
+    }
 
     const dialogueText = document.getElementById('dialogueText');
     const swapPokemon = document.getElementById('swapPokemon');
+    const playerSprite = document.querySelector('.spriteBox.playerSprite img');
+    const nextSprite = new Image();
 
-    const prevPokemon = battleState.playerPokemon;
-    battleState.playerPokemon = nextPokemon;
+    swapPokemon.hidden = true;
+    dialogueText.hidden = false;
 
-    if (prevPokemon.curHP > 0) {
-        swapPokemon.hidden = true;
-        dialogueText.hidden = false;
-        dialogueText.textContent = 'Come back, ' + prevPokemon.name + '!';
-        setTimeout(() => {
-            document.querySelector('.spriteBox.playerSprite img').src =
-                nextPokemon.backSprite;
+    // death swap
+    if (battleState.playerPokemon.curHP > 0) {
+        dialogueText.textContent = 'Come back, ' + battleState.playerPokemon.name + '!';
+        playerSprite.hidden = true;
+        // continque q after death swap
+        setTimeout(executeNextAction, 2000);
+    }
+
+    setTimeout(() => {
+        nextSprite.onload = () => {
+            playerSprite.src = nextPokemon.backSprite;
+            playerSprite.hidden = false;
             dialogueText.textContent = 'Go! ' + nextPokemon.name + '!';
             document.querySelector('.playerStatus .name').textContent = nextPokemon.name;
-        }, 1000);
-        setTimeout(turnEnd, 3000);
-    }
+            updateCombatUi();
+            loadMoveSlots();
+
+            if (battleState.currentTurn.queue.length === 0) {
+                setTimeout(showBattleActions, 1500);
+            }
+        };
+        battleState.playerPokemon = nextPokemon;
+        nextSprite.src = nextPokemon.backSprite;
+    }, 1000);
 }
+
 
 function autoSwitchOpponent() {
     const nextPokemon = teams[1].find(pokemon => pokemon.curHP > 0);
     if (!nextPokemon) {
         // put whatever i do for victory here probably clear data and return after button
-        // or move it into the turn resolve?
+        // or move it into the turn resolve? also add loss version
         document.getElementById('dialogueText').textContent = 'You won the battle!';
         return;
     }
@@ -596,6 +661,7 @@ function autoSwitchOpponent() {
     document.querySelector('.opponentStatus .name').textContent = battleState.opponentPokemon.name;
     document.querySelector('.spriteBox.opponentSprite img').src = pkmnCache[battleState.opponentPokemon.id].frontSprite;
 
+    // temp prob
     updateCombatUi();
 }
 
@@ -603,10 +669,196 @@ function confirmRun() {
     document.getElementById('dialogueText').textContent = 'You cannot run from a trainer battle!';
 }
 
-function turnEnd() {
 
+function turnOrder() {
+    // sort turn q
+    battleState.currentTurn.queue = [];
+
+    for (const action of battleState.currentTurn.actions) {
+        let pokemon;
+        if (action.teamIndex === 0) {
+            pokemon = battleState.playerPokemon;
+        } else {
+            pokemon = battleState.opponentPokemon;
+        }
+
+        let moveData = null;
+        if (action.type === 'MOVE') {
+            const move = pokemon.moves[action.index];
+            moveData = moveCache[move.nr];
+        }
+
+        battleState.currentTurn.queue.push({
+            ...action,
+            pokemon: pokemon,
+            moveData: moveData,
+            switchTarget: action.index
+        });
+    }
+
+    battleState.currentTurn.queue.sort((a, b) => {
+        const pkmnA = a.teamIndex === 0 ? battleState.playerPokemon : battleState.opponentPokemon;
+        const pkmnB = b.teamIndex === 0 ? battleState.playerPokemon : battleState.opponentPokemon;
+
+        // get move prio from cache and switch is 6 by default
+        let priorityA = 6;
+        if (a.type === 'MOVE') {
+            const moveNrA = pkmnA.moves[a.index].nr;
+            priorityA = moveCache[moveNrA].priority || 0;
+        }
+
+        let priorityB = 6;
+        if (b.type === 'MOVE') {
+            const moveNrB = pkmnB.moves[b.index].nr;
+            priorityB = moveCache[moveNrB].priority || 0;
+        }
+
+        // prio sort
+        if (priorityB !== priorityA) {
+            return priorityB - priorityA;
+        }
+
+        // speed rolls if prios are even
+        const speedA = pkmnCache[pkmnA.id].stats.SPD || 0;
+        const speedB = pkmnCache[pkmnB.id].stats.SPD || 0;
+
+        // fastest wins
+        if (speedB !== speedA) {
+            return speedB - speedA;
+        }
+
+        // if speed ties it just coinflips
+        return Math.random() - 0.5;
+    });
+
+    // start q
+    executeNextAction();
+}
+
+
+function executeNextAction() {
+    const queue = battleState.currentTurn.queue;
+
+    // ends turn when list empty
+    if (queue.length === 0) {
+        turnEnd();
+        return;
+    }
+    // take and remove from q
+    const currentAction = queue.shift();
+
+    // death check
+    if (currentAction.pokemon.curHP <= 0) {
+        executeNextAction();
+        return;
+    }
+
+    // check attack or switch
+    if (currentAction.type === 'SWITCH') {
+        executeSwitchLogic(currentAction.switchTarget);
+    } else if (currentAction.type === 'MOVE') {
+        executeMove(currentAction);
+    }
+}
+
+
+
+/* move catagorys overvejer hovr mange jeg burde adde
+0 name "damage"         1 name "ailment"                2 name "net-good-stats"
+3 name "heal"           4 name"damage-ailment"          5 name"swagger"
+6 name"damage-lower"    7 name "damage-raise"           8 name "damage-heal"
+9 name "ohko"           10 name "whole-field-effect"    11 name "field-effect"
+12 name "force-switch"  13 name "unique"
+*/
+
+function executeMove(action) {
+    const attacker = action.pokemon;
+
+    const defender = attacker === battleState.playerPokemon ? battleState.opponentPokemon : battleState.playerPokemon;
+    const move = action.moveData;
+    const dialogueText = document.getElementById('dialogueText');
+
+    dialogueText.textContent = `${attacker.name} used ${move.name}!`;
+
+    // switch for move catagorys probably for now temp maybe not
+    switch (move.category) {
+        case 'damage':
+            // change for real dmg formula later
+            // IMPORTANT LIKE THIS IS NEXT IM USING THIS AS A MARKER
+            //
+            //
+            //
+            //
+            //
+            defender.curHP = Math.max(0, defender.curHP - 20);
+            break;
+
+        case 'ailment':
+
+            //   dialogueText.textContent += `STATUS EFFECT TEXT`;
+            break;
+
+        case 'heal':
+
+            break;
+
+        case 'force-switch':
+            break;
+
+        default:
+            // dmg if no cat for now
+            defender.curHP = Math.max(0, defender.curHP - 100);
+            break;
+    }
+
+    // update hp bar
+    updateCombatUi();
+
+    // 1.5 sec reading pause for actions
+    setTimeout(() => {
+        if (defender.curHP <= 0) {
+            dialogueText.textContent = `${defender.name} fainted!`;
+            // if player pokemon dies stop here or force swap
+            //important so adding marker slashes
+            // also enemy auto swap probably
+            //
+            //
+            setTimeout(executeNextAction, 1500);
+        } else {
+            executeNextAction();
+        }
+    }, 1500);
+}
+
+function executeSwitchLogic(switchTarget) {
+    const nextPokemon = teams[0][switchTarget];
+    const dialogueText = document.getElementById('dialogueText');
+    const playerSprite = document.querySelector('.spriteBox.playerSprite img');
+    const nextSprite = new Image();
+
+    dialogueText.textContent = 'Come back, ' + battleState.playerPokemon.name + '!';
+    playerSprite.hidden = true;
+
+    setTimeout(() => {
+        nextSprite.onload = () => {
+            playerSprite.src = nextPokemon.backSprite;
+            playerSprite.hidden = false;
+            dialogueText.textContent = 'Go! ' + nextPokemon.name + '!';
+            document.querySelector('.playerStatus .name').textContent = nextPokemon.name;
+
+            battleState.playerPokemon = nextPokemon;
+            updateCombatUi();
+            loadMoveSlots();
+            setTimeout(executeNextAction, 1500);
+        };
+        nextSprite.src = nextPokemon.backSprite;
+    }, 1000);
+}
+
+function turnEnd() {
+    // clears q and actions
+    battleState.currentTurn.actions = [];
+    battleState.currentTurn.queue = [];
 
     showBattleActions();
-
-
 }

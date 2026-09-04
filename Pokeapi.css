@@ -442,6 +442,7 @@ header {
     grid-row: 1;
     align-self: center;
     justify-self: center;
+    margin-top: 10px;
 }
 
 .playerSprite {
@@ -449,6 +450,7 @@ header {
     grid-row: 2;
     align-self: center;
     justify-self: center;
+    margin-bottom: 10px;
 }
 
 
@@ -515,14 +517,15 @@ header {
     text-align: left;
     text-overflow: ellipsis;
     font-size: medium;
+    margin-bottom: 10px;
 }
 
 .switchHpBar {
     position: absolute;
-    margin-top: 25px;
+    margin-top: 14px;
     margin-left: 35px;
     width: 125px;
-    height: 6px;
+    height: 7px;
     background: #555;
     border: 1px solid #222;
     border-radius: 2px;
@@ -617,9 +620,8 @@ header {
 }
 
 .spriteBox img {
-    width: 140px;
-    height: 140px;
-    object-fit: contain;
+    width: 192px;
+    height: 192px;
     image-rendering: pixelated;
 }
 
